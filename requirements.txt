@@ -1,0 +1,2 @@
+mistralai>=0.2.0
+openai>=1.7.2

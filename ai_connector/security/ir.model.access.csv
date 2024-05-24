@@ -1,0 +1,8 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_ai_provider_user,access_ai_provider user,ai_connector.model_ai_provider,base.group_user,1,0,0,0
+access_ai_provider_admin,access_ai_provider admin,ai_connector.model_ai_provider,base.group_erp_manager,1,1,1,1
+access_ai_model_user,access_ai_model user,ai_connector.model_ai_model,base.group_user,1,0,0,0
+access_ai_model_admin,access_ai_model admin,ai_connector.model_ai_model,base.group_erp_manager,1,1,1,1
+access_ai_completion_user,access_ai_completion user,ai_connector.model_ai_completion,base.group_user,1,0,0,0
+access_ai_completion_admin,access_ai_completion admin,ai_connector.model_ai_completion,base.group_erp_manager,1,1,1,1
+access_ai_completion_result_user,access_ai_completion_result user,ai_connector.model_ai_completion_result,base.group_user,1,1,1,1
