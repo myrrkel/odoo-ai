@@ -120,6 +120,6 @@
 
     <menuitem id="menu_ai_completion" name="AI Completion"
               action="ai_completion_action"
-              sequence="2"
+              sequence="3"
               parent="ai_connector.menu_ai"/>
 </odoo>

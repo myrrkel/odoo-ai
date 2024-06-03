@@ -25,6 +25,7 @@
         'security/ir.model.access.csv',
         'security/security.xml',
         'views/ai_provider_views.xml',
+        'views/ai_model_views.xml',
         'views/ai_completion_views.xml',
         'views/ai_completion_result_views.xml',
     ],

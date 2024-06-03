@@ -38,6 +38,7 @@
         <field name="model">ai.provider</field>
         <field name="arch" type="xml">
             <tree string="AI Provider">
+                <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="code"/>
                 <field name="active" widget="boolean_toggle"/>

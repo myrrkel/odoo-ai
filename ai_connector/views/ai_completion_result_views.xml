@@ -62,6 +62,20 @@
         </field>
     </record>
 
+    <record id="ai_completion_result_view_search" model="ir.ui.view">
+        <field name="name">ai.completion.result.view.search</field>
+        <field name="model">ai.completion.result</field>
+        <field name="arch" type="xml">
+            <search string="Search Completion Result">
+                <field name="name"/>
+                <group expand="0" string="Group By">
+                    <filter string="Completion" name="group_by_completion_id" domain="[]"
+                            context="{'group_by': 'completion_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="ai_completion_result_action" model="ir.actions.act_window">
         <field name="name">AI Completion Results</field>
         <field name="type">ir.actions.act_window</field>
@@ -76,6 +90,6 @@
 
     <menuitem id="menu_ai_completion_result" name="AI Completion Results"
               action="ai_completion_result_action"
-              sequence="3"
+              sequence="4"
               parent="ai_connector.menu_ai"/>
 </odoo>
