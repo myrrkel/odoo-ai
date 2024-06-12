@@ -3,7 +3,7 @@
 AI Connector
 ============
 
-[<img src="./static/description/icon.png" alt="AI Connector Logo" style="width:160px;"/>](https://mistral.ai/)
+[<img src="./static/description/icon.png" alt="AI Connector Logo" style="width:160px;"/>](https://github.com/myrrkel/odoo-ai)
 
 This technical module provides a connector for the AI platforms.
 

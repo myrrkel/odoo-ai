@@ -3,7 +3,7 @@
 AI Connector OpenAI
 =================
 
-[<img src="./static/img/openai_logo.svg" alt="OpenAI Logo" style="width:300px;"/>](https://mistral.ai/)
+[<img src="./static/img/openai_logo.svg" alt="OpenAI Logo" style="width:300px;"/>](https://openai.com)
 
 
 This technical module provides a connector for the OpenAI API.
