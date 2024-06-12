@@ -10,13 +10,7 @@ _logger = logging.getLogger(__name__)
 class AICompletion(models.Model):
     _inherit = 'ai.completion'
 
-    def prepare_messages(self, messages):
-        if self.ai_provider == 'mistralai':
-            messages = [ChatMessage(role=m['role'], content=m['content']) for m in messages]
-            return messages
-        return super(AICompletion, self).prepare_messages(messages)
-
-    @api.onchange('ai_provider_id')
-    def _onchange_ai_provider_id(self):
-        if not self.ai_provider_id or self.ai_model_id not in self.ai_provider_id.ai_model_ids:
-            self.ai_model_id = False
+    def prepare_message(self, message):
+        if self.ai_provider == 'mistralai' and isinstance(message, dict):
+            return ChatMessage(**message)
+        return super(AICompletion, self).prepare_message(message)

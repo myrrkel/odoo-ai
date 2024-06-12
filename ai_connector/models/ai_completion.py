@@ -1,5 +1,6 @@
 # Copyright (C) 2024 - Michel Perrocheau (https://github.com/myrrkel).
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
+import json
 from odoo import models, fields, api, _
 from odoo.tools import html2plaintext
 
@@ -30,9 +31,13 @@ class AICompletion(models.Model):
     test_answer = fields.Text(readonly=True)
     post_process = fields.Selection(selection='_get_post_process_list')
     response_format = fields.Selection(selection='_get_response_format_list', default='text')
+    tool_ids = fields.Many2many('ai.tool', string='Tools', copy=True)
+
+    def prepare_message(self, message):
+        return message
 
     def prepare_messages(self, messages):
-        return messages
+        return [self.prepare_message(message) for message in messages]
 
     def create_completion(self, rec_id=0, messages=None, prompt='', **kwargs):
         response_format = kwargs.get('response_format', self.response_format) or 'text'
@@ -47,7 +52,8 @@ class AICompletion(models.Model):
             messages.append({'role': 'user', 'content': prompt})
         messages = self.prepare_messages(messages)
 
-        choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(messages, **kwargs)
+        choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id, messages,
+                                                                                              **kwargs)
         result_ids = []
         for choice in choices:
             _logger.info(f'Completion result: {choice.message.content}')
@@ -67,20 +73,35 @@ class AICompletion(models.Model):
                     _logger.error(err, exc_info=True)
         return result_ids
 
-    def get_completion_results(self, messages, **kwargs):
-        ai_client = self.get_ai_client()
+    def get_completion_params(self, messages, kwargs):
         model = self.ai_model_id.name or kwargs.get('model', '')
         temperature = self.temperature or kwargs.get('temperature', 0)
         top_p = self.top_p or kwargs.get('top_p', 0)
         max_tokens = kwargs.get('max_tokens', self.max_tokens or 10000)
+        completion_params = {
+            'model': model,
+            'messages': messages,
+            'max_tokens': max_tokens,
+            'temperature': temperature,
+            'top_p': top_p,
+            'tools': [t.get_tool_dict() for t in self.tool_ids] if self.tool_ids else None,
+        }
+        return completion_params
+
+    def get_completion(self, completion_params):
+        ai_client = self.get_ai_client()
+        return ai_client.chat(**completion_params)
+
+    def get_completion_results(self, rec_id, messages, **kwargs):
         _logger.info(f'Create completion: {messages}')
-        res = ai_client.chat(
-            model=model,
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            top_p=top_p,
-        )
+        completion_params = self.get_completion_params(messages, kwargs)
+        res = self.get_completion(completion_params)
+        for choice in res.choices:
+            if choice.finish_reason == 'tool_calls':
+                for tool_call in choice.message.tool_calls:
+                    messages.append(choice.message)
+                    messages.append(self.prepare_message(self.run_tool_call(tool_call)))
+                    return self.get_completion_results(rec_id, messages, **kwargs)
         return res.choices, res.usage.prompt_tokens, res.usage.completion_tokens, res.usage.total_tokens
 
     def get_result_content(self, response_format, choices):
@@ -111,6 +132,39 @@ class AICompletion(models.Model):
                   }
         result_id = self.env['ai.completion.result'].create(values)
         return result_id
+
+    def run_tool_call(self, tool_call):
+        tool_name = tool_call.function.name
+        res_dict = {'role': 'tool',
+                    "tool_call_id": tool_call.id,
+                    'content': '',
+                    'name': tool_name}
+        tool_id = self.tool_ids.filtered(lambda t: t.name == tool_name)
+        if not tool_id:
+            return res_dict
+        model_name = tool_id.model or self.model_id.model
+        model = self.env[model_name]
+
+        if hasattr(model, tool_name):
+            function = getattr(model, tool_name)
+        else:
+            model = self.env['ai.tool']
+            if hasattr(model, tool_name):
+                function = getattr(model, tool_name)
+            else:
+                return res_dict
+
+        arguments = tool_call.function.arguments
+        if arguments:
+            arguments_vals = json.loads(arguments)
+            _logger.info(f'Run tool: {tool_name}({arguments_vals})')
+            res = function(**arguments_vals)
+        else:
+            res = function()
+            _logger.info(f'Run tool: {tool_name}()')
+
+        res_dict['content'] = str(res)
+        return res_dict
 
     def exec_post_process(self, value):
         if not self.post_process:

@@ -46,6 +46,14 @@
                                attrs="{'invisible': [('system_template_id', '!=', False)]}"/>
                     </group>
 
+                    <group name="tools" string="AI Tools (Function Calling)">
+                        <field name="tool_ids">
+                            <tree string="Tools">
+                                <field name="name"/>
+                            </tree>
+                        </field>
+                    </group>
+
                     <group name="bottom">
                         <group>
                             <field name="prompt_template_id" domain="[('type', '=', 'qweb')]"/>

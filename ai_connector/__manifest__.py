@@ -24,10 +24,13 @@
     'data': [
         'security/ir.model.access.csv',
         'security/security.xml',
+        'data/ai_tool_data.xml',
         'views/ai_provider_views.xml',
         'views/ai_model_views.xml',
         'views/ai_completion_views.xml',
         'views/ai_completion_result_views.xml',
+        'views/ai_question_answer_views.xml',
+        'views/ai_tool_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
