@@ -45,11 +45,30 @@ Available functions in prompt template:
 
 ### Tests
 
-Test actions use the first record of the model selected by the domain.
+Test action will use the first record found with the domain set for the model.
 
 Test first your prompt to adjust your template, then test the result of the Completion to adjust AI parameters.
 
 ![image](./static/img/tests.png)
+
+### Tools (Function calling)
+
+Many LLM (OpenAI, Mistral AI) allows to provide tools to AI model so the AI assistant will be able to get datas from Odoo to generate the correct answer.
+By default, only one tool is available:
+
+`search_question_answer` : When this tool is added to the completion, the AI will try when it's necessary to find by keywords the most relevant answers in the `AI Question Answers` table. Then the AI model can return a completion according to information in these answers.
+
+It's possible to add more tools in **Settings**, **Technical**, **AI Tools**
+
+
+### Question-Answers
+
+To add a newQuestion-Answer go to **Settings**, **Technical**, **AI Question Answers** and create a new record.
+
+It's also possible to generate a set of question-answer with a completion. 
+In the prompt ask AI to return a JSON list of question-answer dictionary like [{'question': '...', 'answer': '...'}] and 
+select the post-process function 'JSON to questions' to create the questions and answers records.
+
 
 ## Requirements
 

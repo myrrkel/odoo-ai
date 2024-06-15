@@ -15,7 +15,19 @@
 
                     <group name="result" col="1">
                         <group col="2">
-                            <field name="property_ids"/>
+                            <field name="property_ids" context="{'tool_id': active_id}">
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="tool_id" invisible="1"/>
+                                            <field name="name"/>
+                                            <field name="type"/>
+                                        </group>
+                                        <field name="description"/>
+                                        <field name="required"/>
+                                    </group>
+                                </form>
+                            </field>
                             <field name="required_property_ids"/>
                         </group>
                     </group>

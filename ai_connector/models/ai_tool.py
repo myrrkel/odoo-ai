@@ -20,9 +20,9 @@ class AiTool(models.Model):
     model_id = fields.Many2one('ir.model', string='Model', ondelete='cascade')
     model = fields.Char(related='model_id.model', string='Model Name', readonly=True, store=True)
     type = fields.Selection(selection=_get_tool_type_list)
-    property_ids = fields.One2many('ai.tool.property', 'tool_id', copy=True)
-    required_property_ids = fields.One2many('ai.tool.property', 'tool_id', readonly=True,
-                                            domain=[('required', '=', True)])
+    property_ids = fields.One2many('ai.tool.property', 'tool_id', string='Properties', copy=True)
+    required_property_ids = fields.One2many('ai.tool.property', 'tool_id', string='Required Properties',
+                                            domain=[('required', '=', True)], readonly=True)
 
     def get_tool_dict(self):
         res = {'type': 'function',
