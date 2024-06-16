@@ -9,6 +9,21 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+def _extract_json(content):
+    start_pos = content.find('{')
+    end_post = content.rfind('}') + 1
+    res = content[start_pos:end_post]
+    try:
+        json_res = json.loads(res)
+    except json.JSONDecodeError as err:
+        if '\\_' in res:
+            res = res.replace('\\_', '_')
+            return _extract_json(res)
+        else:
+            raise _logger.error(err)
+    return res
+
+
 class AICompletion(models.Model):
     _name = 'ai.completion'
     _description = 'AI Completion'
@@ -61,6 +76,8 @@ class AICompletion(models.Model):
             _logger.info(f'Completion result: {choice.message.content}')
             if rec_id:
                 answer = choice.message.content
+                if self.response_format == 'json_object' or response_format == 'json_object':
+                    answer = _extract_json(answer)
                 if self.save_answer:
                     result_id = self.create_result(rec_id, prompt, answer, prompt_tokens, completion_tokens, total_tokens)
                     result_ids.append(result_id)
@@ -107,11 +124,6 @@ class AICompletion(models.Model):
         return res.choices, res.usage.prompt_tokens, res.usage.completion_tokens, res.usage.total_tokens
 
     def get_result_content(self, response_format, choices):
-        def _extract_json(content):
-            start_pos = content.find('{')
-            end_post = content.rfind('}') + 1
-            return content[start_pos:end_post]
-
         if self.response_format == 'json_object' or response_format == 'json_object':
             return [_extract_json(choice.message.content) for choice in choices]
         return [choice.message.content for choice in choices]
