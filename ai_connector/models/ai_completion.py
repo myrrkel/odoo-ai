@@ -51,6 +51,8 @@ class AICompletion(models.Model):
                 prompt = self.get_prompt(rec_id)
             messages.append({'role': 'user', 'content': prompt})
         messages = self.prepare_messages(messages)
+        if not rec_id and self.env.context.get('completion'):
+            rec_id = self.env.context.get('completion').get('res_id', 0)
 
         choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id, messages,
                                                                                               **kwargs)
@@ -118,10 +120,16 @@ class AICompletion(models.Model):
         return self.create_completion(rec_id)
 
     def create_result(self, rec_id, prompt, answer, prompt_tokens, completion_tokens, total_tokens):
+        model_id = self.model_id.id
+        if self.env.context.get('completion'):
+            model = self.env.context.get('completion').get('model', '')
+            if model:
+                model_id = self.env['ir.model'].search([('model', '=', model)]).id
+
         values = {'completion_id': self.id,
                   'ai_provider_id': self.ai_provider_id.id,
                   'ai_model_id': self.ai_model_id.id,
-                  'model_id': self.model_id.id,
+                  'model_id': model_id,
                   'target_field_id': self.target_field_id.id,
                   'res_id': rec_id,
                   'prompt': prompt,
