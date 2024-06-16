@@ -8,7 +8,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class AiTool(models.Model):
+class AITool(models.Model):
     _name = 'ai.tool'
     _description = 'AI Tool'
 

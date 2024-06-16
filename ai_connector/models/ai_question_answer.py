@@ -8,7 +8,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class AiQuestionAnswer(models.Model):
+class AIQuestionAnswer(models.Model):
     _name = 'ai.question.answer'
     _description = 'AI Question Answer'
 
@@ -21,6 +21,7 @@ class AiQuestionAnswer(models.Model):
                                     compute='_compute_resource_ref', inverse='_set_resource_ref')
     answer_completion_id = fields.Many2one('ai.completion', string='Answer Completion')
     content_length = fields.Integer(compute='_compute_content_length')
+    tag_ids = fields.Many2many('ai.question.answer.tag', string='Tags')
 
     @api.model
     def _selection_target_model(self):
@@ -84,24 +85,3 @@ class AiQuestionAnswer(models.Model):
         res = list(filter(lambda x: x['score'] == max_score, res))
         res = sorted(res, key=lambda x: x['length'])
         return json.dumps(res[0])
-    #
-    # @api.model
-    # def get_search_question_answer_tool(self):
-    #     return {
-    #         "type": "function",
-    #         "function": {
-    #             "name": "search_question_answer",
-    #             "description": "Search by keywords in the frequently asked questions database. "
-    #                            "Returns a list of questions with their answers",
-    #             "parameters": {
-    #                 "type": "object",
-    #                 "properties": {
-    #                     "keywords": {
-    #                         "type": "string",
-    #                         "description": "A list of comma separated keywords. Example: keyword1,keyword2,keyword3",
-    #                     },
-    #                 },
-    #                 "required": ["keywords"],
-    #             },
-    #         }
-    #     }

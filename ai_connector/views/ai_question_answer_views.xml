@@ -8,7 +8,10 @@
                 <sheet>
                     <group name="top">
                         <field name="resource_ref" class="oe_inline"/>
-                        <field name="answer_completion_id"/>
+                        <group name="top_left">
+                            <field name="answer_completion_id"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        </group>
                     </group>
 
                     <group name="result" col="1">
@@ -30,9 +33,29 @@
                 <field name="model_id"/>
                 <field name="resource_ref"/>
                 <field name="answer_completion_id"/>
-                <field name="name"/>
-                <field name="answer"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="name" optional="hide"/>
+                <field name="answer" optional="hide"/>
             </tree>
+        </field>
+    </record>
+
+    <record id="ai_question_answer_view_search" model="ir.ui.view">
+        <field name="name">ai.question.answer.view.search</field>
+        <field name="model">ai.question.answer</field>
+        <field name="arch" type="xml">
+            <search string="AI Question Answers">
+                <field name="name"/>
+                <field name="tag_ids"/>
+                <field name="answer_completion_id"/>
+                <field name="model_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="Completion" name="group_by_answer_completion_id" domain="[]"
+                            context="{'group_by': 'answer_completion_id'}"/>
+                    <filter string="Model" name="group_by_model_id" domain="[]"
+                            context="{'group_by': 'model_id'}"/>
+                </group>
+            </search>
         </field>
     </record>
 

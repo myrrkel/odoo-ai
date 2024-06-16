@@ -55,7 +55,10 @@
         <field name="arch" type="xml">
             <tree string="AI Completion Results" create="false">
                 <field name="resource_ref"/>
-                <field name="answer"/>
+                <field name="name"/>
+                <field name="completion_id" optional="hide"/>
+                <field name="model_id" optional="hide"/>
+                <field name="answer" optional="hide"/>
                 <button name="action_apply" type="object"
                         string="Apply" class="btn-primary"/>
             </tree>
@@ -71,6 +74,8 @@
                 <group expand="0" string="Group By">
                     <filter string="Completion" name="group_by_completion_id" domain="[]"
                             context="{'group_by': 'completion_id'}"/>
+                    <filter string="Model" name="group_by_model_id" domain="[]"
+                            context="{'group_by': 'model_id'}"/>
                 </group>
             </search>
         </field>
