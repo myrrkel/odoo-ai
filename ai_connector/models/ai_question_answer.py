@@ -51,7 +51,7 @@ class AIQuestionAnswer(models.Model):
 
     def action_answer_question(self):
         for rec in self:
-            res = rec.answer_completion_id.create_completion(rec.id)
+            res = rec.answer_completion_id.create_completion(rec.id, prompt=rec.name)
             rec.answer = res[0].answer
 
     def get_score(self, keyword_list):
