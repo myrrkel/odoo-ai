@@ -17,9 +17,9 @@ class CreateQuestionAnswerWizard(models.TransientModel):
 
     def get_completion_answer(self, completion_result_id):
         if self.answer_type == 'answer':
-            return completion_result_id.prompt
+            return completion_result_id.answer
         if self.answer_type == 'original':
-            return completion_result_id.origin_answer or completion_result_id.prompt
+            return completion_result_id.origin_answer or completion_result_id.answer
 
     def create_question_answer(self):
         for rec in self:

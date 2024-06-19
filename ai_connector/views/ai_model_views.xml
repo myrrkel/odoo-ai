@@ -9,6 +9,7 @@
                     <group name="top">
                         <group name="top_left">
                             <field name="name"/>
+                            <field name="label"/>
                             <field name="display_name"/>
                             <field name="ai_provider_id"/>
                         </group>

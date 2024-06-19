@@ -59,8 +59,7 @@ class AIFineTuning(models.Model):
             if self.system_role_content:
                 messages.append({'role': 'system', 'content': self.system_role_content})
 
-            messages.extend([{'role': 'user', 'content': question_answer_id.name},
-                             {'role': 'assistant', 'content': question_answer_id.answer}])
+            messages.extend(question_answer_id.get_training_content())
 
             values = {'messages': messages}
             content += json.dumps(values) + '\n'

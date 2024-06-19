@@ -49,6 +49,10 @@ class AIQuestionAnswer(models.Model):
                 rec.model_id = self.env['ir.model']._get(rec.resource_ref._name)
                 rec.res_id = rec.resource_ref.id
 
+    def get_training_content(self):
+        return [{'role': 'user', 'content': self.name},
+                {'role': 'assistant', 'content': self.answer}]
+
     def action_answer_question(self):
         for rec in self:
             res = rec.answer_completion_id.create_completion(rec.id, prompt=rec.name)
