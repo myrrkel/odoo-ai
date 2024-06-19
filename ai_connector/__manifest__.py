@@ -31,6 +31,7 @@
         'views/ai_completion_result_views.xml',
         'views/ai_question_answer_views.xml',
         'views/ai_tool_views.xml',
+        'views/ai_fine_tuning_views.xml',
         'wizards/create_question_answer_wizard.xml',
     ],
     'assets': {

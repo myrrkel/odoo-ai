@@ -11,3 +11,4 @@ from . import ai_tool
 from . import ai_tool_property
 from . import ai_question_answer
 from . import ai_question_answer_tag
+from . import ai_fine_tuning
