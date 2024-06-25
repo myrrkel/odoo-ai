@@ -21,13 +21,17 @@
                     </group>
 
                     <group name="question_answer" col="1">
+                        <field name="graph_checkpoints" widget="fine_tuning_graph"/>
+
                         <group col="2">
-                            <field name="question_answer_ids"/>
+                            <field name="question_answer_ids"
+                                   attrs="{'invisible': [('training_file_id', '!=', False)]}"/>
                         </group>
                     </group>
                     <group name="training_question_answer" col="1">
                         <group col="2">
-                            <field name="training_question_answer_ids"/>
+                            <field name="training_question_answer_ids"
+                                   attrs="{'invisible': [('training_file_id', '=', False)]}"/>
                         </group>
                     </group>
                 </sheet>

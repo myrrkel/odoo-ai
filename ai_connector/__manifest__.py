@@ -38,9 +38,9 @@
     'assets': {
         'web.assets_backend': [
             'ai_connector/static/src/scss/style.scss',
+            'ai_connector/static/src/js/**/*',
         ],
     },
-
     'auto_install': False,
     'installable': True,
     'application': False,
