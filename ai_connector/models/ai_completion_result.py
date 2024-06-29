@@ -92,3 +92,21 @@ class AICompletionResult(models.Model):
             else:
                 res.append((4, rec_el.id))
         return res
+
+    def get_completion_answer(self, answer_type):
+        if answer_type == 'answer':
+            return self.answer
+        if answer_type == 'original':
+            return self.origin_answer or self.answer
+
+    def create_question_answer(self, answer_type, tag_ids=None):
+        answer = self.get_completion_answer(answer_type)
+        create_vals = {'name': self.prompt,
+                       'answer': answer,
+                       'answer_completion_id': self.completion_id.id,
+                       'model_id': self.model_id.id,
+                       'res_id': self.res_id,
+                       }
+        if tag_ids:
+            create_vals['tag_ids'] = [(6, 0, tag_ids.ids)]
+        self.env['ai.question.answer'].create(create_vals)
