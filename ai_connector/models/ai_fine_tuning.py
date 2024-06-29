@@ -21,6 +21,8 @@ class AIFineTuning(models.Model):
     ai_model_id = fields.Many2one('ai.model', string='AI Model', required=True, ondelete='cascade',
                                   default=lambda self: self.env['ai.model'].search([], limit=1))
     ai_provider = fields.Selection(string='AI Provider Code', related='ai_provider_id.code')
+    training_steps = fields.Integer(default=10)
+    learning_rate = fields.Float(default=0.0001, digits=(10, 7))
     training_file_id = fields.Char('Training File ID', readonly=True, copy=False)
     fine_tuning_job_id = fields.Char('Fine-Tuning Job ID', readonly=True, copy=False)
     fine_tuned_model = fields.Char('Fine-Tuned Model', readonly=True, copy=False)
@@ -58,6 +60,9 @@ class AIFineTuning(models.Model):
     def _compute_graph_checkpoints(self):
         for rec in self:
             checkpoints = self.fine_tuning_checkpoints
+            if not checkpoints:
+                rec.graph_checkpoints = []
+                continue
             checkpoints.sort(key=lambda x: x['created_at'])
             train_loss_vals = [x['metrics']['train_loss'] for x in checkpoints]
             valid_loss_vals = [x['metrics']['valid_loss'] for x in checkpoints]
@@ -208,7 +213,6 @@ class AIFineTuning(models.Model):
                                          'display_name': 'Fine-Tuned - %s' % self.name,
                                          'ai_provider_id': self.ai_provider_id.id})
         _logger.info(res)
-
 
     def action_create_training_file(self):
         for rec in self:

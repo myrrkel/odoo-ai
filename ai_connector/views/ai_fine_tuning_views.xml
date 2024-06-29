@@ -5,6 +5,17 @@
         <field name="model">ai.fine.tuning</field>
         <field name="arch" type="xml">
             <form string="OpenAI Fine-Tunings">
+                <header>
+                    <button name="action_create_training_file" string="Create Training File" type="object"
+                            title="Create Training File"
+                            attrs="{'invisible': [('training_file_id', '!=', False)]}"/>
+                    <button name="action_create_fine_tuning" string="Create Fine-Tuning Job" type="object"
+                            title="Create Training File"
+                            attrs="{'invisible': ['|',('training_file_id', '=', False),('job_status', '!=', False)]}"/>
+                    <button name="action_update_fine_tuned_model" string="Update Job Status" type="object"
+                            title="Update Job Status"
+                            attrs="{'invisible': [('job_status', '=', False)]}"/>
+                </header>
                 <sheet>
                     <group name="top">
                         <field name="name"/>
@@ -13,6 +24,8 @@
                         <field name="question_answer_domain"/>
                         <field name="question_answer_tag_ids" widget="many2many_tags"
                                options="{'color_field': 'color'}"/>
+                        <field name="training_steps"/>
+                        <field name="learning_rate"/>
                         <field name="system_role_content"/>
                         <field name="training_file_id"/>
                         <field name="fine_tuning_job_id"/>

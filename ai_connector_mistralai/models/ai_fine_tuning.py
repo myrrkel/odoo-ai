@@ -15,6 +15,6 @@ class AIFineTuning(models.Model):
     def get_create_fine_tuning_job_params(self):
         res = super(AIFineTuning, self).get_create_fine_tuning_job_params()
         if self.ai_provider == 'mistralai':
-            res['hyperparameters'] = TrainingParameters(training_steps=10,
-                                                        learning_rate=0.0001)
+            res['hyperparameters'] = TrainingParameters(training_steps=self.training_steps,
+                                                        learning_rate=self.learning_rate)
             return res
