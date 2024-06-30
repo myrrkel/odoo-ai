@@ -11,6 +11,7 @@ _logger = logging.getLogger(__name__)
 class AIQuestionAnswer(models.Model):
     _name = 'ai.question.answer'
     _description = 'AI Question Answer'
+    _order = 'create_date desc'
 
     name = fields.Text('Question')
     answer = fields.Text('Answer')

@@ -91,6 +91,7 @@ class AIFineTuning(models.Model):
         file = ('training_%s' % self.id, self.get_training_content())
         res = client.files.create(file=file, purpose='fine-tune')
         self.training_file_id = res.id
+        self.training_question_answer_ids = self.question_answer_ids
 
     def get_create_fine_tuning_job_params(self):
         return {
@@ -206,21 +207,23 @@ class AIFineTuning(models.Model):
             "valid_loss": c.metrics.valid_loss,
             "valid_mean_token_accuracy": c.metrics.valid_mean_token_accuracy
         }} for c in res.checkpoints]
-        if res.status == 'SUCCESS' and res.status != self.job_status:
-            self.fine_tuned_model = res.fine_tuned_model
+        if res.status != self.job_status:
             self.job_status = res.status
-            self.env['ai.model'].create({'name': self.fine_tuned_model,
-                                         'display_name': 'Fine-Tuned - %s' % self.name,
-                                         'ai_provider_id': self.ai_provider_id.id})
+            if res.status == 'SUCCESS':
+                self.fine_tuned_model = res.fine_tuned_model
+                self.env['ai.model'].create({'name': self.fine_tuned_model,
+                                             'display_name': 'Fine-Tuned - %s' % self.name,
+                                             'ai_provider_id': self.ai_provider_id.id})
         _logger.info(res)
 
     def action_create_training_file(self):
         for rec in self:
             rec.create_training_file()
-            rec.training_question_answer_ids = rec.question_answer_ids
 
     def action_create_fine_tuning(self):
         for rec in self:
+            if not rec.training_file_id:
+                rec.create_training_file()
             rec.create_fine_tuning()
 
     def action_update_fine_tuned_model(self):

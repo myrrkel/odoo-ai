@@ -10,7 +10,7 @@
                         <group name="top_left">
                             <field name="name"/>
                             <field name="code"/>
-                            <field name="api_key"/>
+                            <field name="api_key" password="True"/>
                             <field name="organization_id"/>
                         </group>
                         <group name="top_right">
@@ -23,9 +23,9 @@
                                     type="object" class="oe_highlight"/>
                         </group>
                     </group>
-                    <group name="bottom">
-                        <group>
-                            <field name="ai_model_ids"/>
+                    <group name="bottom" string="AI Models" col="1">
+                        <group col="1">
+                            <field name="ai_model_ids" string=""/>
                         </group>
                     </group>
                 </sheet>
@@ -37,7 +37,7 @@
         <field name="name">ai.provider.view.tree</field>
         <field name="model">ai.provider</field>
         <field name="arch" type="xml">
-            <tree string="AI Provider">
+            <tree string="AI Provider" default_order="sequence">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="code"/>

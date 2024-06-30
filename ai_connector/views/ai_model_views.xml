@@ -29,10 +29,11 @@
         <field name="arch" type="xml">
             <tree string="AI Model" default_order="ai_provider_sequence,default desc,sequence">
                 <field name="sequence" widget="handle"/>
-                <field name="name"/>
+                <field name="display_name"/>
                 <field name="ai_provider_id"/>
                 <field name="active" widget="boolean_toggle"/>
                 <field name="default" widget="boolean_toggle"/>
+                <field name="ai_provider_sequence" invisible="1"/>
             </tree>
         </field>
     </record>
