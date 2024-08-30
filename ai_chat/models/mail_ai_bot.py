@@ -34,7 +34,7 @@ class MailBot(models.AbstractModel):
                 message_type = 'comment'
                 subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
                 record = record.with_context(mail_create_nosubscribe=True).sudo()
-                record.message_post(body=answer, author_id=ai_bot_id, message_type=message_type, subtype_id=subtype_id)
+                return record.message_post(body=answer, author_id=ai_bot_id, message_type=message_type, subtype_id=subtype_id)
 
     def get_chat_messages(self, record, header, only_human=False):
         partner_ai_id = self.env.ref('ai_chat.partner_ai')
@@ -67,6 +67,6 @@ class MailBot(models.AbstractModel):
 
     def _is_bot_in_private_channel(self, record):
         ai_bot_id = self.env['ir.model.data']._xmlid_to_res_id('ai_chat.partner_ai')
-        if record._name == 'mail.channel' and record.channel_type == 'chat':
+        if record._name == 'discuss.channel' and record.channel_type == 'chat':
             return ai_bot_id in record.with_context(active_test=False).channel_partner_ids.ids
         return False

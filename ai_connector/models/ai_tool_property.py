@@ -17,7 +17,7 @@ class AIToolProperty(models.Model):
                 ('integer', _('Integer'))]
 
     name = fields.Char()
-    tool_id = fields.Many2one('ai.tool', invisible=True)
+    tool_id = fields.Many2one('ai.tool')
     type = fields.Selection(selection=_get_tool_property_type_list)
     description = fields.Text()
     required = fields.Boolean()

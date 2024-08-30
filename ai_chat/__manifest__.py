@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/algpl.html).
 {
     'name': 'AI Chat',
-    'version': '16.0.0.0.1',
+    'version': '17.0.0.0.1',
     'author': 'Michel Perrocheau',
     'website': 'https://github.com/myrrkel',
     'summary': "Add a AI Bot user to chat with",

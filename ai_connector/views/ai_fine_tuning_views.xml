@@ -8,10 +8,10 @@
                 <header>
                     <button name="action_create_fine_tuning" string="Create Fine-Tuning Job" type="object"
                             title="Create Fine-Tuning Job" class="btn-primary" icon="fa-cogs"
-                            attrs="{'invisible': [('training_file_id', '!=', False)]}"/>
+                            invisible="training_file_id != False"/>
                     <button name="update_fine_tuned_model" string="Update Job Status" type="object"
                             title="Update Job Status" class="btn-primary" icon="fa-refresh"
-                            attrs="{'invisible': [('fine_tuning_job_id', '=', False)]}"/>
+                            invisible="fine_tuning_job_id == False"/>
                 </header>
                 <sheet>
                     <group name="top">
@@ -50,11 +50,11 @@
 
                     <group name="question_answer" col="1">
                         <field name="graph_checkpoints" widget="fine_tuning_graph" width="80%"
-                               attrs="{'invisible': [('graph_checkpoints', '=', False)]}"/>
+                               invisible="graph_checkpoints == False"/>
 
                         <group col="2">
                             <field name="question_answer_ids"
-                                   attrs="{'invisible': [('training_file_id', '!=', False)]}">
+                                   invisible="training_file_id != False">
                                 <tree name="question_answer" limit="10" default_order="id desc">
                                     <field name="model_id"/>
                                     <field name="resource_ref"/>
@@ -67,7 +67,7 @@
                     <group name="training_question_answer" col="1">
                         <group col="2">
                             <field name="training_question_answer_ids"
-                                   attrs="{'invisible': [('training_file_id', '=', False)]}">
+                                   invisible="training_file_id == False">
                                 <tree name="training_question_answer" limit="10" default_order="id desc">
                                     <field name="model_id"/>
                                     <field name="resource_ref"/>

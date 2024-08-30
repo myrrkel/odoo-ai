@@ -18,7 +18,7 @@ class AIMixin(models.AbstractModel):
 
     name = fields.Char()
     active = fields.Boolean(default=True)
-    ai_provider_id = fields.Many2one('ai.provider', string='AI Provider', required=True, ondelete='cascade',
+    ai_provider_id = fields.Many2one('ai.provider', string='AI Provider', required=False, ondelete='cascade',
                                      default=lambda self: self.env['ai.provider'].search([], limit=1))
     ai_model_id = fields.Many2one('ai.model', string='AI Model', ondelete='cascade',
                                   default=lambda self: self.env['ai.model'].search([], limit=1))

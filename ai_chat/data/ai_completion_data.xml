@@ -3,7 +3,7 @@
     <data noupdate="1">
         <record id="completion_chat" model="ai.completion">
             <field name="name">AI Chat</field>
-            <field name="model_id" ref="mail.model_mail_channel"/>
+            <field name="model_id" ref="mail.model_discuss_channel"/>
             <field name="domain">[]</field>
             <field name="max_tokens">4096</field>
             <field name="temperature">1</field>
