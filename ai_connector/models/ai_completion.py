@@ -209,3 +209,15 @@ class AICompletion(models.Model):
             self.test_answer = res[0].answer
         else:
             self.test_answer = res
+
+    @api.model
+    def get_model_completions(self, model):
+        res = self.search([('model_id', '=', model)])
+        return [{'id': r.id, 'name': r.name} for r in res]
+
+    @api.model
+    def run_completion(self, completion_id, active_ids):
+        completion = self.browse(completion_id)
+        for res_id in active_ids:
+            completion.create_completion(res_id)
+            self.browse(completion_id).create_completion(res_id)
