@@ -24,6 +24,7 @@ class AIProvider(models.Model):
         model_list = ai_client.list_models()
         res = [(m.id, m.id) for m in model_list.data]
         res.sort()
+
         return res
 
     def get_ai_client(self):
@@ -31,5 +32,5 @@ class AIProvider(models.Model):
             return super(AIProvider, self).get_ai_client()
         if not self.api_key:
             raise UserError(_('MistralAI API key is required.'))
-        client = MistralClient(api_key=self.api_key)
+        client = MistralClient(api_key=self.api_key, endpoint=self.base_url or "https://api.mistral.ai")
         return client
