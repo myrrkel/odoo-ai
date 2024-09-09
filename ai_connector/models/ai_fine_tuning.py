@@ -44,7 +44,7 @@ class AIFineTuning(models.Model):
 
     def get_fine_tuning_job_client(self):
         client = self.get_ai_client()
-        return client.jobs
+        return client.fine_tuning.jobs
 
     @api.onchange('question_answer_tag_ids', 'question_answer_domain')
     def _compute_question_answers(self):

@@ -81,8 +81,11 @@ class AICompletion(models.Model):
                 if self.save_answer:
                     result_id = self.create_result(rec_id, prompt, answer, prompt_tokens, completion_tokens, total_tokens)
                     result_ids.append(result_id)
+                    continue
                 if self.post_process and not self.target_field_id:
                     self.exec_post_process(answer)
+                if not self.save_answer and self.target_field_id and self.save_on_target_field:
+                    self.env[self.model_id.model].browse(rec_id).write({self.target_field_id.name: answer})
                 if not self.save_answer:
                     return answer
             else:
@@ -109,7 +112,7 @@ class AICompletion(models.Model):
 
     def get_completion(self, completion_params):
         ai_client = self.get_ai_client()
-        return ai_client.chat(**completion_params)
+        return ai_client.chat.complete(**completion_params)
 
     def get_completion_results(self, rec_id, messages, **kwargs):
         _logger.info(f'Create completion: {messages}')

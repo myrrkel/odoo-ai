@@ -1,6 +1,6 @@
 # Copyright (C) 2024 - Michel Perrocheau (https://github.com/myrrkel).
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
-from mistralai.client import MistralClient
+from mistralai import Mistral
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 import logging
@@ -21,9 +21,10 @@ class AIProvider(models.Model):
         except Exception as err:
             _logger.error(err)
             return [('mistral-small-latest', 'Mistral Small')]
-        model_list = ai_client.list_models()
+        model_list = ai_client.models.list()
         res = [(m.id, m.id) for m in model_list.data]
         res.sort()
+
         return res
 
     def get_ai_client(self):
@@ -31,5 +32,5 @@ class AIProvider(models.Model):
             return super(AIProvider, self).get_ai_client()
         if not self.api_key:
             raise UserError(_('MistralAI API key is required.'))
-        client = MistralClient(api_key=self.api_key)
+        client = Mistral(api_key=self.api_key)
         return client
