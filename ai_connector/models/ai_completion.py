@@ -68,6 +68,8 @@ class AICompletion(models.Model):
         messages = self.prepare_messages(messages)
         if not rec_id and self.env.context.get('completion'):
             rec_id = self.env.context.get('completion').get('res_id', 0)
+            if isinstance(rec_id, list) and len(rec_id) == 1:
+                rec_id = rec_id[0]
 
         choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id, messages,
                                                                                               **kwargs)
