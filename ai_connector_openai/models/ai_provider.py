@@ -31,5 +31,5 @@ class AIProvider(models.Model):
             return super(AIProvider, self).get_ai_client()
         if not self.api_key:
             raise UserError(_('OpenAI API key is required.'))
-        client = OpenAI(api_key=self.api_key)
+        client = OpenAI(api_key=self.api_key, base_url=self.base_url or None)
         return client

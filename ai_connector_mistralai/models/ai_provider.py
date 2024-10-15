@@ -32,5 +32,5 @@ class AIProvider(models.Model):
             return super(AIProvider, self).get_ai_client()
         if not self.api_key:
             raise UserError(_('MistralAI API key is required.'))
-        client = Mistral(api_key=self.api_key)
+        client = Mistral(api_key=self.api_key, server_url=self.base_url or None)
         return client

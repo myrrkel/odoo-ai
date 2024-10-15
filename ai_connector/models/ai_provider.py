@@ -21,6 +21,7 @@ class AIProvider(models.Model):
     api_key = fields.Char()
     organization_id = fields.Char(string='Organization ID')
     ai_model_ids = fields.One2many('ai.model', 'ai_provider_id', string='AI Models', readonly=True)
+    base_url = fields.Char()
 
     def get_ai_model_list(self):
         return []
