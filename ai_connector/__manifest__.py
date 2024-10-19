@@ -12,6 +12,7 @@
     'depends': [
         'base',
         'mail',
+        'web_editor',
     ],
     'category': 'AI',
     'complexity': 'easy',
@@ -25,6 +26,7 @@
         'security/ir.model.access.csv',
         'security/security.xml',
         'data/ai_tool_data.xml',
+        'data/ai_provider_data.xml',
         'views/ai_provider_views.xml',
         'views/ai_model_views.xml',
         'views/ai_completion_views.xml',

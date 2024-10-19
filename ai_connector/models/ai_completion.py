@@ -3,6 +3,7 @@
 import json
 from odoo import models, fields, api, _
 from odoo.tools import html2plaintext
+from odoo.addons.web_editor.controllers.main import Web_Editor
 
 import logging
 
@@ -55,6 +56,9 @@ class AICompletion(models.Model):
         return [self.prepare_message(message) for message in messages]
 
     def create_completion(self, rec_id=0, messages=None, prompt='', **kwargs):
+        prompt_tokens = 0
+        completion_tokens = 0
+        total_tokens = 0
         response_format = kwargs.get('response_format', self.response_format) or 'text'
         if not messages:
             messages = []
@@ -71,13 +75,18 @@ class AICompletion(models.Model):
             if isinstance(rec_id, list) and len(rec_id) == 1:
                 rec_id = rec_id[0]
 
-        choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id, messages,
-                                                                                              **kwargs)
+        if self.ai_provider == 'odoo':
+            res = Web_Editor.generate_text(self, prompt, messages)
+            choices = [res]
+        else:
+            res_choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id,
+                                                                                                      messages,
+                                                                                                      **kwargs)
+            choices = [choice.message.content for choice in res_choices]
         result_ids = []
-        for choice in choices:
-            _logger.info(f'Completion result: {choice.message.content}')
+        for answer in choices:
+            _logger.info(f'Completion result: {answer}')
             if rec_id:
-                answer = choice.message.content
                 if self.response_format == 'json_object' or response_format == 'json_object':
                     answer = _extract_json(answer)
                 if self.save_answer:
