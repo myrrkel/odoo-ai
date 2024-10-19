@@ -31,11 +31,12 @@ class AICompletion(models.Model):
             'n': self.n or 1,
             'frequency_penalty': self.frequency_penalty,
             'presence_penalty': self.presence_penalty,
-            'stop': stop,
-            'response_format': response_format,
-            'tools': [t.get_tool_dict() for t in self.tool_ids] if self.tool_ids else None,
-            'tool_choice': 'auto' if self.tool_ids else None,
+            'stop': stop or None,
+            'response_format': response_format
         }
+        if self.tool_ids:
+            params.update({'tools': [t.get_tool_dict() for t in self.tool_ids],
+                           'tool_choice': 'auto'})
         completion_params.update(params)
         return completion_params
 

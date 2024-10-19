@@ -108,8 +108,9 @@ class AICompletion(models.Model):
             'max_tokens': max_tokens,
             'temperature': temperature,
             'top_p': top_p,
-            'tools': [t.get_tool_dict() for t in self.tool_ids] if self.tool_ids else None,
         }
+        if self.tool_ids:
+            completion_params.update({'tools': [t.get_tool_dict() for t in self.tool_ids]})
         return completion_params
 
     def get_completion(self, completion_params):
