@@ -21,7 +21,8 @@ def _extract_json(content):
             res = res.replace('\\_', '_')
             return _extract_json(res)
         else:
-            raise _logger.error(err)
+            _logger.error(err)
+            return {}
     return res
 
 
