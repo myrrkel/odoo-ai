@@ -20,7 +20,8 @@ def _extract_json(content):
             res = res.replace('\\_', '_')
             return _extract_json(res)
         else:
-            raise _logger.error(err)
+            _logger.error(err)
+            return {}
     return res
 
 
@@ -47,6 +48,7 @@ class AICompletion(models.Model):
     post_process = fields.Selection(selection='_get_post_process_list')
     response_format = fields.Selection(selection='_get_response_format_list', default='text')
     tool_ids = fields.Many2many('ai.tool', string='Tools', copy=True)
+    add_completion_action_menu = fields.Boolean()
 
     def prepare_message(self, message):
         return message
@@ -68,6 +70,8 @@ class AICompletion(models.Model):
         messages = self.prepare_messages(messages)
         if not rec_id and self.env.context.get('completion'):
             rec_id = self.env.context.get('completion').get('res_id', 0)
+            if isinstance(rec_id, list) and len(rec_id) == 1:
+                rec_id = rec_id[0]
 
         choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id, messages,
                                                                                               **kwargs)
@@ -81,8 +85,11 @@ class AICompletion(models.Model):
                 if self.save_answer:
                     result_id = self.create_result(rec_id, prompt, answer, prompt_tokens, completion_tokens, total_tokens)
                     result_ids.append(result_id)
+                    continue
                 if self.post_process and not self.target_field_id:
                     self.exec_post_process(answer)
+                if not self.save_answer and self.target_field_id and self.save_on_target_field:
+                    self.env[self.model_id.model].browse(rec_id).write({self.target_field_id.name: answer})
                 if not self.save_answer:
                     return answer
             else:
@@ -103,8 +110,9 @@ class AICompletion(models.Model):
             'max_tokens': max_tokens,
             'temperature': temperature,
             'top_p': top_p,
-            'tools': [t.get_tool_dict() for t in self.tool_ids] if self.tool_ids else None,
         }
+        if self.tool_ids:
+            completion_params.update({'tools': [t.get_tool_dict() for t in self.tool_ids]})
         return completion_params
 
     def get_completion(self, completion_params):
@@ -206,3 +214,15 @@ class AICompletion(models.Model):
             self.test_answer = res[0].answer
         else:
             self.test_answer = res
+
+    @api.model
+    def get_model_completions(self, model):
+        res = self.search([('model_id', '=', model), ('add_completion_action_menu', '=', True)])
+        return [{'id': r.id, 'name': r.name} for r in res]
+
+    @api.model
+    def run_completion(self, completion_id, active_ids):
+        completion = self.browse(completion_id)
+        for res_id in active_ids:
+            completion.create_completion(res_id)
+            self.browse(completion_id).create_completion(res_id)

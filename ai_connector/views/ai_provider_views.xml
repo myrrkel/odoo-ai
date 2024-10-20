@@ -11,6 +11,7 @@
                             <field name="name"/>
                             <field name="code"/>
                             <field name="api_key" password="True"/>
+                            <field name="base_url"/>
                             <field name="organization_id"/>
                         </group>
                         <group name="top_right">

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="ai_connector.RunCompletion" owl="1">
+        <button class="dropdown-item" t-on-click="runCompletion">
+            <i class="me-1 fa fa-fw fa-lg fa-magic"/>
+            <t t-esc="props.title"/>
+        </button>
+    </t>
+
+</templates>

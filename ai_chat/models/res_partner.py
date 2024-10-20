@@ -10,6 +10,8 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    is_ai_bot = fields.Boolean('Is AI Bot')
+
     def _compute_im_status(self):
         super(ResPartner, self)._compute_im_status()
         ai_bot_user_id = self.env['ir.model.data']._xmlid_to_res_id('ai_chat.partner_ai')
