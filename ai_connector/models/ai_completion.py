@@ -73,13 +73,13 @@ class AICompletion(models.Model):
             if isinstance(rec_id, list) and len(rec_id) == 1:
                 rec_id = rec_id[0]
 
-        choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id, messages,
+        res_choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id, messages,
                                                                                               **kwargs)
+        choices = [choice.message.content for choice in res_choices]
         result_ids = []
-        for choice in choices:
-            _logger.info(f'Completion result: {choice.message.content}')
+        for answer in choices:
+            _logger.info(f'Completion result: {answer}')
             if rec_id:
-                answer = choice.message.content
                 if self.response_format == 'json_object' or response_format == 'json_object':
                     answer = _extract_json(answer)
                 if self.save_answer:
@@ -133,8 +133,8 @@ class AICompletion(models.Model):
 
     def get_result_content(self, response_format, choices):
         if self.response_format == 'json_object' or response_format == 'json_object':
-            return [_extract_json(choice.message.content) for choice in choices]
-        return [choice.message.content for choice in choices]
+            return [_extract_json(choice) for choice in choices]
+        return choices
 
     def ai_create(self, rec_id, method=False):
         return self.create_completion(rec_id)
