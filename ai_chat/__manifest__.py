@@ -29,8 +29,8 @@
         'data/ai_completion_data.xml',
     ],
     'assets': {
-        'mail.assets_messaging': [
-            'ai_chat/static/src/models/messaging_initializer.js',
+        'web.assets_backend': [
+            'ai_chat/static/src/js/channel_commands.js',
         ],
     },
     'auto_install': False,
