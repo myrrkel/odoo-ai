@@ -49,6 +49,7 @@ class AICompletion(models.Model):
     post_process = fields.Selection(selection='_get_post_process_list')
     response_format = fields.Selection(selection='_get_response_format_list', default='text')
     tool_ids = fields.Many2many('ai.tool', string='Tools', copy=True)
+    add_completion_action_menu = fields.Boolean()
 
     def prepare_message(self, message):
         return message
@@ -225,7 +226,7 @@ class AICompletion(models.Model):
 
     @api.model
     def get_model_completions(self, model):
-        res = self.search([('model_id', '=', model)])
+        res = self.search([('model_id', '=', model), ('add_completion_action_menu', '=', True)])
         return [{'id': r.id, 'name': r.name} for r in res]
 
     @api.model

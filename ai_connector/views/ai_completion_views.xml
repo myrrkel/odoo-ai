@@ -17,6 +17,7 @@
                             <field name="domain"/>
                             <field name="save_on_target_field"/>
                             <field name="save_answer"/>
+                            <field name="add_completion_action_menu"/>
                         </group>
                         <group name="top_right">
                             <field name="active" widget="boolean_toggle"/>
