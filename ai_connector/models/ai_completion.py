@@ -142,8 +142,8 @@ class AICompletion(models.Model):
 
     def get_result_content(self, response_format, choices):
         if self.response_format == 'json_object' or response_format == 'json_object':
-            return [_extract_json(choice.message.content) for choice in choices]
-        return [choice.message.content for choice in choices]
+            return [_extract_json(choice) for choice in choices]
+        return choices
 
     def ai_create(self, rec_id, method=False):
         return self.create_completion(rec_id)
