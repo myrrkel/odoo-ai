@@ -15,7 +15,7 @@
 
                     <group name="result" col="1">
                         <group col="2">
-                            <field name="property_ids" context="{'tool_id': active_id}">
+                            <field name="property_ids" context="{'tool_id': id}">
                                 <form>
                                     <group>
                                         <group>
