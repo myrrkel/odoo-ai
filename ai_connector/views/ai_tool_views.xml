@@ -22,9 +22,9 @@
                                             <field name="tool_id" invisible="1"/>
                                             <field name="name"/>
                                             <field name="type"/>
+                                            <field name="description"/>
+                                            <field name="required"/>
                                         </group>
-                                        <field name="description"/>
-                                        <field name="required"/>
                                     </group>
                                 </form>
                             </field>
