@@ -217,7 +217,7 @@ class AICompletion(models.Model):
 
     @api.model
     def get_model_completions(self, model):
-        res = self.search([('model_id', '=', model), ('add_completion_action_menu', '=', True)])
+        res = self.sudo().search([('model_id', '=', model), ('add_completion_action_menu', '=', True)])
         return [{'id': r.id, 'name': r.name} for r in res]
 
     @api.model
