@@ -20,7 +20,8 @@ def _extract_json(content):
             res = res.replace('\\_', '_')
             return _extract_json(res)
         else:
-            _logger.error(err)
+            msg = 'Invalid JSON: %s in %s' % (err, res)
+            _logger.warning(msg, exc_info=True)
             return {}
     return res
 
