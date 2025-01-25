@@ -43,24 +43,27 @@ patch(ActionMenus.prototype, 'ai_connector.ActionMenus', {
             return items;
         }
 
-        const results = await this.orm.call("ai.completion", "get_model_completions", [this.props.resModel]);
-        for (const i in results) {
-            const res = results[i];
-            items.push({
-                RunCompletion,
-                Component: RunCompletion,
-                groupNumber: ACTIONS_GROUP_NUMBER,
-                key: `run-completion-${res['id']}`,
-                description: _t(res['name']),
-                props: {
-                    menu: this,
-                    title: _t(res['name']),
-                    completion_id: res['id'],
-                },
-            });
+        try {
+            const results = await this.orm.call("ai.completion", "get_model_completions", [this.props.resModel]);
+            for (const i in results) {
+                const res = results[i];
+                items.push({
+                    RunCompletion,
+                    Component: RunCompletion,
+                    groupNumber: ACTIONS_GROUP_NUMBER,
+                    key: `run-completion-${res['id']}`,
+                    description: _t(res['name']),
+                    props: {
+                        menu: this,
+                        title: _t(res['name']),
+                        completion_id: res['id'],
+                    },
+                });
+            }
+            return items;
+        } catch (error) {
+            return items;
         }
-        return items;
-
     },
 
 })
