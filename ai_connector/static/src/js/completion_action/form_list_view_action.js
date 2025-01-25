@@ -44,6 +44,9 @@ patch(ActionMenus.prototype, 'ai_connector.ActionMenus', {
         }
 
         try {
+            if (!await self.user.hasGroup("ai_connector.group_ai_user")) {
+                return items;
+            }
             const results = await this.orm.call("ai.completion", "get_model_completions", [this.props.resModel]);
             for (const i in results) {
                 const res = results[i];
