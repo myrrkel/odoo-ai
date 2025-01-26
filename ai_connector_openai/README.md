@@ -1,6 +1,6 @@
  [![License: LGPL-3](https://img.shields.io/badge/licence-LGPL--3-blue.png)](http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
-AI Connector OpenAI
+OpenAI Connector
 =================
 
 [<img src="./static/img/openai_logo.svg" alt="OpenAI Logo" style="width:300px;"/>](https://openai.com)

@@ -74,9 +74,8 @@ class AICompletion(models.Model):
             if isinstance(rec_id, list) and len(rec_id) == 1:
                 rec_id = rec_id[0]
 
-        res_choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id, messages,
+        choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id, messages,
                                                                                               **kwargs)
-        choices = [choice.message.content for choice in res_choices]
         result_ids = []
         for answer in choices:
             _logger.info(f'Completion result: {answer}')
@@ -113,8 +112,11 @@ class AICompletion(models.Model):
             'top_p': top_p,
         }
         if self.tool_ids:
-            completion_params.update({'tools': [t.get_tool_dict() for t in self.tool_ids]})
+            completion_params.update(self.get_tools_params())
         return completion_params
+
+    def get_tools_params(self):
+        return {'tools': [t.get_tool_dict() for t in self.tool_ids]}
 
     def get_completion(self, completion_params):
         ai_client = self.get_ai_client()
@@ -130,7 +132,8 @@ class AICompletion(models.Model):
                     messages.append(choice.message)
                     messages.append(self.prepare_message(self.run_tool_call(tool_call)))
                     return self.get_completion_results(rec_id, messages, **kwargs)
-        return res.choices, res.usage.prompt_tokens, res.usage.completion_tokens, res.usage.total_tokens
+        choices = [choice.message.content for choice in res.choices]
+        return choices, res.usage.prompt_tokens, res.usage.completion_tokens, res.usage.total_tokens
 
     def get_result_content(self, response_format, choices):
         if self.response_format == 'json_object' or response_format == 'json_object':
@@ -162,8 +165,14 @@ class AICompletion(models.Model):
         result_id = self.env['ai.completion.result'].create(values)
         return result_id
 
+    def get_tool_call_values(self, tool_call):
+        return {'function': tool_call.function.name, 'arguments': tool_call.function.arguments}
+
     def run_tool_call(self, tool_call):
-        tool_name = tool_call.function.name
+        tool_call_values = self.get_tool_call_values(tool_call)
+        tool_name = tool_call_values.get('function', '')
+        if not tool_name:
+            return {}
         res_dict = {'role': 'tool',
                     "tool_call_id": tool_call.id,
                     'content': '',
@@ -183,11 +192,12 @@ class AICompletion(models.Model):
             else:
                 return res_dict
 
-        arguments = tool_call.function.arguments
+        arguments = tool_call_values.get('arguments')
         if arguments:
-            arguments_vals = json.loads(arguments)
-            _logger.info(f'Run tool: {tool_name}({arguments_vals})')
-            res = function(**arguments_vals)
+            if isinstance(arguments, str):
+                arguments = json.loads(arguments)
+            _logger.info(f'Run tool: {tool_name}({arguments})')
+            res = function(**arguments)
         else:
             res = function()
             _logger.info(f'Run tool: {tool_name}()')

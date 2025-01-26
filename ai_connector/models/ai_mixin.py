@@ -73,6 +73,8 @@ class AIMixin(models.AbstractModel):
         return prompt[rec_id].strip()
 
     def get_records(self, limit=0):
+        if not self.model_id:
+            return
         domain = safe_eval(self.domain, SAFE_EVAL_BASE, {'self': self}) if self.domain else []
         rec_ids = self.env[self.model_id.model].search(domain, limit=limit)
         return rec_ids
