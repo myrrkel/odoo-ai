@@ -3,6 +3,7 @@
 import json
 from odoo import models, fields, api, _
 from odoo.tools import html2plaintext
+import base64
 
 import logging
 
@@ -50,12 +51,44 @@ class AICompletion(models.Model):
     response_format = fields.Selection(selection='_get_response_format_list', default='text')
     tool_ids = fields.Many2many('ai.tool', string='Tools', copy=True)
     add_completion_action_menu = fields.Boolean()
+    vision = fields.Boolean()
+    image_source = fields.Selection([('main_attachment', _('Main Attachment')),
+                                     ('binary_field', _('Binary Field'))])
+    image_field_id = fields.Many2one('ir.model.fields', string='Image Field')
 
-    def prepare_message(self, message):
+    def prepare_message(self, message, rec_id=0):
+        _logger.info(f"Prepare message: {message}")
+        if self.vision:
+            message = self.prepare_message_image(message, rec_id)
         return message
 
-    def prepare_messages(self, messages):
-        return [self.prepare_message(message) for message in messages]
+    def prepare_message_image(self, message, rec_id=0):
+        image_binary = None
+        rec = self.get_record(rec_id)
+        if self.image_source == 'main_attachment':
+            if rec and hasattr(rec, 'message_main_attachment_id'):
+                if rec.message_main_attachment_id:
+                    attachment_id = rec.message_main_attachment_id
+                    image_binary = attachment_id.with_context(bin_size=False).datas.decode('utf-8')
+                    # image_binary = base64.b64decode(attachment_id.with_context(bin_size=False).datas)
+        elif self.image_source == 'binary_field':
+            if rec and hasattr(rec, self.image_field_id.name):
+                image_binary = base64.b64decode(rec[self.image_field_id.name])
+        if image_binary:
+            image_content = self.prepare_message_image_content(image_binary)
+            content = [{'type': 'text', 'text': message['content']}, image_content]
+            message['content'] = content
+        return message
+
+    def prepare_message_image_content(self, image_binary):
+        image_content = {
+            'type': 'image_url',
+            'image_url': f'data:image/jpeg;base64,{image_binary}'
+        }
+        return image_content
+
+    def prepare_messages(self, messages, rec_id=0):
+        return [self.prepare_message(message, rec_id) for message in messages]
 
     def create_completion(self, rec_id=0, messages=None, prompt='', **kwargs):
         response_format = kwargs.get('response_format', self.response_format) or 'text'
@@ -68,7 +101,7 @@ class AICompletion(models.Model):
             if not prompt:
                 prompt = self.get_prompt(rec_id)
             messages.append({'role': 'user', 'content': prompt})
-        messages = self.prepare_messages(messages)
+        messages = self.prepare_messages(messages, rec_id)
         if not rec_id and self.env.context.get('completion'):
             rec_id = self.env.context.get('completion').get('res_id', 0)
             if isinstance(rec_id, list) and len(rec_id) == 1:
@@ -88,7 +121,7 @@ class AICompletion(models.Model):
                     continue
                 if self.post_process and not self.target_field_id:
                     self.exec_post_process(answer)
-                if not self.save_answer and self.target_field_id and self.save_on_target_field:
+                if self.target_field_id and self.save_on_target_field:
                     self.env[self.model_id.model].browse(rec_id).write({self.target_field_id.name: answer})
                 if not self.save_answer:
                     return answer
@@ -120,10 +153,16 @@ class AICompletion(models.Model):
 
     def get_completion(self, completion_params):
         ai_client = self.get_ai_client()
-        return ai_client.chat(**completion_params)
+        return ai_client.chat.complete(**completion_params)
+
+    # def log_messages(self, messages):
+    #     for message in messages:
+    #         if isinstance(message, dict):
+    #             content = message.get('content')
+    #             _logger.info(f"Create completion: {}")
+    #         _logger.info(f"Create completion: {message}")
 
     def get_completion_results(self, rec_id, messages, **kwargs):
-        _logger.info(f'Create completion: {messages}')
         completion_params = self.get_completion_params(messages, kwargs)
         res = self.get_completion(completion_params)
         for choice in res.choices:

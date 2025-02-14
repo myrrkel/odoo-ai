@@ -32,6 +32,10 @@ export class RunCompletion extends Component {
 RunCompletion.template = 'ai_connector.RunCompletion';
 
 patch(ActionMenus.prototype, 'ai_connector.ActionMenus', {
+    setup() {
+        this._super();
+        this.user = useService("user");
+    },
 
     async setActionItems(props) {
 
@@ -44,7 +48,7 @@ patch(ActionMenus.prototype, 'ai_connector.ActionMenus', {
         }
 
         try {
-            if (!await self.user.hasGroup("ai_connector.group_ai_user")) {
+            if (!await this.user.hasGroup("ai_connector.group_ai_user")) {
                 return items;
             }
             const results = await this.orm.call("ai.completion", "get_model_completions", [this.props.resModel]);

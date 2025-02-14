@@ -22,6 +22,7 @@ class AIModel(models.Model):
     ai_provider_id = fields.Many2one('ai.provider', string='AI Provider', required=True, index=True, ondelete='cascade')
     ai_provider_sequence = fields.Integer(related='ai_provider_id.sequence', string='AI Provider Sequence',
                                           store=True, index=True)
+    vision = fields.Boolean()
 
     @api.depends('name', 'label')
     def _compute_display_name(self):

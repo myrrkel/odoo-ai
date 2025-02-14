@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="group_ai_user" model="res.groups">
-        <field name="name">Users allowed to AI</field>
+        <field name="name">OdooAI : Users allowed to use AI completions</field>
     </record>
 
 </odoo>

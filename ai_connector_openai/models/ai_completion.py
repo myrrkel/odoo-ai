@@ -1,6 +1,6 @@
 # Copyright (C) 2024 - Michel Perrocheau (https://github.com/myrrkel).
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
-from mistralai.models.chat_completion import ChatMessage
+
 from odoo import models, fields, api, _
 import logging
 
@@ -15,8 +15,8 @@ class AICompletion(models.Model):
     frequency_penalty = fields.Float()
     presence_penalty = fields.Float()
 
-    def prepare_messages(self, messages):
-        return super(AICompletion, self).prepare_messages(messages)
+    def prepare_messages(self, messages, rec_id=0):
+        return super(AICompletion, self).prepare_messages(messages, rec_id=rec_id)
 
     def get_completion_params(self, messages, kwargs):
         completion_params = super(AICompletion, self).get_completion_params(messages, kwargs)

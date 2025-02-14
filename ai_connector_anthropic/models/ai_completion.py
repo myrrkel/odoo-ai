@@ -14,9 +14,9 @@ class AICompletion(models.Model):
     frequency_penalty = fields.Float()
     presence_penalty = fields.Float()
 
-    def prepare_message(self, message):
+    def prepare_message(self, message, rec_id=0):
         if not self.ai_provider == 'anthropic':
-            return super(AICompletion, self).prepare_message(message)
+            return super(AICompletion, self).prepare_message(message, rec_id)
         if message.get('role') == 'tool':
             return {
                 "role": "user",
@@ -28,7 +28,22 @@ class AICompletion(models.Model):
                     }
                 ]
             }
+        if self.vision:
+            message = self.prepare_message_image(message, rec_id)
         return message
+
+    def prepare_message_image_content(self, image_binary):
+        if not self.ai_provider == 'anthropic':
+            return super(AICompletion, self).prepare_message_image_content(image_binary)
+        image_content ={
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": 'image/jpeg',
+                        "data": image_binary,
+                    },
+                }
+        return image_content
 
     def get_completion(self, completion_params):
         if self.ai_provider == 'anthropic':
