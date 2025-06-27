@@ -62,7 +62,7 @@ class AICompletion(models.Model):
             message = self.prepare_message_image(message, rec_id)
         return message
 
-    def prepare_message_image(self, message, rec_id=0):
+    def get_image_binary(self, rec_id):
         image_binary = None
         rec = self.get_record(rec_id)
         if self.image_source == 'main_attachment':
@@ -73,7 +73,11 @@ class AICompletion(models.Model):
                     # image_binary = base64.b64decode(attachment_id.with_context(bin_size=False).datas)
         elif self.image_source == 'binary_field':
             if rec and hasattr(rec, self.image_field_id.name):
-                image_binary = base64.b64decode(rec[self.image_field_id.name])
+                image_binary = rec.with_context(bin_size=False)[self.image_field_id.name].decode('utf-8')
+        return image_binary
+
+    def prepare_message_image(self, message, rec_id=0):
+        image_binary = self.get_image_binary(rec_id)
         if image_binary:
             image_content = self.prepare_message_image_content(image_binary)
             content = [{'type': 'text', 'text': message['content']}, image_content]
