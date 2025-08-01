@@ -23,7 +23,7 @@ class AIMixin(models.AbstractModel):
     ai_model_id = fields.Many2one('ai.model', string='AI Model', ondelete='cascade',
                                   default=lambda self: self.env['ai.model'].search([], limit=1))
     ai_provider = fields.Selection(string='AI Provider Code', related='ai_provider_id.code')
-    model_id = fields.Many2one('ir.model', string='Model', required=True, ondelete='cascade')
+    model_id = fields.Many2one('ir.model', string='Model', required=False, ondelete='cascade')
     domain = fields.Char()
     save_on_target_field = fields.Boolean()
     save_answer = fields.Boolean()
@@ -73,6 +73,8 @@ class AIMixin(models.AbstractModel):
         return prompt[rec_id].strip()
 
     def get_records(self, limit=0):
+        if not self.model_id:
+            return
         domain = safe_eval(self.domain, SAFE_EVAL_BASE, {'self': self}) if self.domain else []
         rec_ids = self.env[self.model_id.model].search(domain, limit=limit)
         return rec_ids

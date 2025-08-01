@@ -3,6 +3,7 @@
 import json
 from odoo import models, fields, api, _
 from odoo.tools import html2plaintext
+import base64
 from odoo.addons.web_editor.controllers.main import Web_Editor
 
 import logging
@@ -21,7 +22,8 @@ def _extract_json(content):
             res = res.replace('\\_', '_')
             return _extract_json(res)
         else:
-            _logger.error(err)
+            msg = 'Invalid JSON: %s in %s' % (err, res)
+            _logger.warning(msg, exc_info=True)
             return {}
     return res
 
@@ -50,12 +52,48 @@ class AICompletion(models.Model):
     response_format = fields.Selection(selection='_get_response_format_list', default='text')
     tool_ids = fields.Many2many('ai.tool', string='Tools', copy=True)
     add_completion_action_menu = fields.Boolean()
+    vision = fields.Boolean()
+    image_source = fields.Selection([('main_attachment', _('Main Attachment')),
+                                     ('binary_field', _('Binary Field'))])
+    image_field_id = fields.Many2one('ir.model.fields', string='Image Field')
 
-    def prepare_message(self, message):
+    def prepare_message(self, message, rec_id=0):
+        _logger.info(f"Prepare message: {message}")
+        if self.vision:
+            message = self.prepare_message_image(message, rec_id)
         return message
 
-    def prepare_messages(self, messages):
-        return [self.prepare_message(message) for message in messages]
+    def get_image_binary(self, rec_id):
+        image_binary = None
+        rec = self.get_record(rec_id)
+        if self.image_source == 'main_attachment':
+            if rec and hasattr(rec, 'message_main_attachment_id'):
+                if rec.message_main_attachment_id:
+                    attachment_id = rec.message_main_attachment_id
+                    image_binary = attachment_id.with_context(bin_size=False).datas.decode('utf-8')
+                    # image_binary = base64.b64decode(attachment_id.with_context(bin_size=False).datas)
+        elif self.image_source == 'binary_field':
+            if rec and hasattr(rec, self.image_field_id.name):
+                image_binary = rec.with_context(bin_size=False)[self.image_field_id.name].decode('utf-8')
+        return image_binary
+
+    def prepare_message_image(self, message, rec_id=0):
+        image_binary = self.get_image_binary(rec_id)
+        if image_binary:
+            image_content = self.prepare_message_image_content(image_binary)
+            content = [{'type': 'text', 'text': message['content']}, image_content]
+            message['content'] = content
+        return message
+
+    def prepare_message_image_content(self, image_binary):
+        image_content = {
+            'type': 'image_url',
+            'image_url': f'data:image/jpeg;base64,{image_binary}'
+        }
+        return image_content
+
+    def prepare_messages(self, messages, rec_id=0):
+        return [self.prepare_message(message, rec_id) for message in messages]
 
     def create_completion(self, rec_id=0, messages=None, prompt='', **kwargs):
         prompt_tokens = 0
@@ -71,7 +109,7 @@ class AICompletion(models.Model):
             if not prompt:
                 prompt = self.get_prompt(rec_id)
             messages.append({'role': 'user', 'content': prompt})
-        messages = self.prepare_messages(messages)
+        messages = self.prepare_messages(messages, rec_id)
         if not rec_id and self.env.context.get('completion'):
             rec_id = self.env.context.get('completion').get('res_id', 0)
             if isinstance(rec_id, list) and len(rec_id) == 1:
@@ -97,7 +135,7 @@ class AICompletion(models.Model):
                     continue
                 if self.post_process and not self.target_field_id:
                     self.exec_post_process(answer)
-                if not self.save_answer and self.target_field_id and self.save_on_target_field:
+                if self.target_field_id and self.save_on_target_field:
                     self.env[self.model_id.model].browse(rec_id).write({self.target_field_id.name: answer})
                 if not self.save_answer:
                     return answer
@@ -121,15 +159,24 @@ class AICompletion(models.Model):
             'top_p': top_p,
         }
         if self.tool_ids:
-            completion_params.update({'tools': [t.get_tool_dict() for t in self.tool_ids]})
+            completion_params.update(self.get_tools_params())
         return completion_params
+
+    def get_tools_params(self):
+        return {'tools': [t.get_tool_dict() for t in self.tool_ids]}
 
     def get_completion(self, completion_params):
         ai_client = self.get_ai_client()
         return ai_client.chat.complete(**completion_params)
 
+    # def log_messages(self, messages):
+    #     for message in messages:
+    #         if isinstance(message, dict):
+    #             content = message.get('content')
+    #             _logger.info(f"Create completion: {}")
+    #         _logger.info(f"Create completion: {message}")
+
     def get_completion_results(self, rec_id, messages, **kwargs):
-        _logger.info(f'Create completion: {messages}')
         completion_params = self.get_completion_params(messages, kwargs)
         res = self.get_completion(completion_params)
         for choice in res.choices:
@@ -138,7 +185,8 @@ class AICompletion(models.Model):
                     messages.append(choice.message)
                     messages.append(self.prepare_message(self.run_tool_call(tool_call)))
                     return self.get_completion_results(rec_id, messages, **kwargs)
-        return res.choices, res.usage.prompt_tokens, res.usage.completion_tokens, res.usage.total_tokens
+        choices = [choice.message.content for choice in res.choices]
+        return choices, res.usage.prompt_tokens, res.usage.completion_tokens, res.usage.total_tokens
 
     def get_result_content(self, response_format, choices):
         if self.response_format == 'json_object' or response_format == 'json_object':
@@ -170,8 +218,14 @@ class AICompletion(models.Model):
         result_id = self.env['ai.completion.result'].create(values)
         return result_id
 
+    def get_tool_call_values(self, tool_call):
+        return {'function': tool_call.function.name, 'arguments': tool_call.function.arguments}
+
     def run_tool_call(self, tool_call):
-        tool_name = tool_call.function.name
+        tool_call_values = self.get_tool_call_values(tool_call)
+        tool_name = tool_call_values.get('function', '')
+        if not tool_name:
+            return {}
         res_dict = {'role': 'tool',
                     "tool_call_id": tool_call.id,
                     'content': '',
@@ -191,11 +245,12 @@ class AICompletion(models.Model):
             else:
                 return res_dict
 
-        arguments = tool_call.function.arguments
+        arguments = tool_call_values.get('arguments')
         if arguments:
-            arguments_vals = json.loads(arguments)
-            _logger.info(f'Run tool: {tool_name}({arguments_vals})')
-            res = function(**arguments_vals)
+            if isinstance(arguments, str):
+                arguments = json.loads(arguments)
+            _logger.info(f'Run tool: {tool_name}({arguments})')
+            res = function(**arguments)
         else:
             res = function()
             _logger.info(f'Run tool: {tool_name}()')

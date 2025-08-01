@@ -24,20 +24,22 @@ class AITool(models.Model):
     required_property_ids = fields.One2many('ai.tool.property', 'tool_id', string='Required Properties',
                                             domain=[('required', '=', True)], readonly=True)
 
-    def get_tool_dict(self):
-        res = {'type': 'function',
-               'function': {
-                   'name': self.name,
-                   'description': self.description}}
-        properties = {}
-        for property_id in self.property_ids:
-            properties[property_id.name] = {'type': property_id.type,
-                                            'description': property_id.description}
-        if properties:
-            parameters = {'type': 'object',
-                          'properties': properties}
-            required = [p.name for p in self.required_property_ids]
-            if required:
-                parameters['required'] = required
-            res['function']['parameters'] = parameters
-        return res
+    def get_tool_dict(self, tool_format='default'):
+        if tool_format == 'default':
+            res = {'type': 'function',
+                   'function': {
+                       'name': self.name,
+                       'description': self.description}}
+            properties = {}
+            for property_id in self.property_ids:
+                properties[property_id.name] = {'type': property_id.type,
+                                                'description': property_id.description}
+            if properties:
+                parameters = {'type': 'object',
+                              'properties': properties}
+                required = [p.name for p in self.required_property_ids]
+                if required:
+                    parameters['required'] = required
+                res['function']['parameters'] = parameters
+            return res
+        return {}

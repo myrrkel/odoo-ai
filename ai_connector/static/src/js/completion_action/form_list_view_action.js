@@ -9,7 +9,7 @@ import { Component } from "@odoo/owl";
 
 export class RunCompletion extends Component {
     static template = "ai_connector.RunCompletion";
-    static props = ["title", "completion_id"];
+    static props = ["title", "completion_id", "menu"];
 
     static components = { DropdownItem };
 
@@ -20,7 +20,7 @@ export class RunCompletion extends Component {
 
     async runCompletion() {
         await this.orm.call("ai.completion", "run_completion",
-            [this.props.completion_id, this.props.getActiveIds()]);
+            [this.props.completion_id, this.props.menu.props.getActiveIds()]);
 
         this.action.doAction({
             type: "ir.actions.client",
@@ -29,11 +29,17 @@ export class RunCompletion extends Component {
     }
 }
 
-patch(ActionMenus.prototype, {
+RunCompletion.template = 'ai_connector.RunCompletion';
 
-    async getActionItems(props) {
+patch(ActionMenus.prototype, 'ai_connector.ActionMenus', {
+    setup() {
+        this._super();
+        this.user = useService("user");
+    },
 
-        const items = await super.getActionItems(props);
+    async setActionItems(props) {
+
+        const items = await this._super(...arguments);
         if ('registryItems' in props) {
             return items;
         }
@@ -41,21 +47,29 @@ patch(ActionMenus.prototype, {
             return items;
         }
 
-        const results = await this.orm.call("ai.completion", "get_model_completions", [this.props.resModel]);
-        results.forEach( res => {
-            items.push({
-                Component: RunCompletion,
-                groupNumber: ACTIONS_GROUP_NUMBER,
-                key: res['id'],
-                props: {
-                    ...this.props,
-                    'title': _t(res['name']),
-                    'completion_id': res['id'],
-                },
-            });
-        });
-        return items;
-
+        try {
+            if (!await this.user.hasGroup("ai_connector.group_ai_user")) {
+                return items;
+            }
+            const results = await this.orm.call("ai.completion", "get_model_completions", [this.props.resModel]);
+            results.forEach( res => {
+                items.push({
+                    RunCompletion,
+                    Component: RunCompletion,
+                    groupNumber: ACTIONS_GROUP_NUMBER,
+                    key: `run-completion-${res['id']}`,
+                    description: _t(res['name']),
+                    props: {
+                        menu: this,
+                        title: _t(res['name']),
+                        completion_id: res['id'],
+                    },
+                });
+            })
+            return items;
+        } catch (error) {
+            return items;
+        }
     },
 
 })

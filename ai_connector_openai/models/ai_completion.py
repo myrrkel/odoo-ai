@@ -15,8 +15,8 @@ class AICompletion(models.Model):
     frequency_penalty = fields.Float()
     presence_penalty = fields.Float()
 
-    def prepare_messages(self, messages):
-        return super(AICompletion, self).prepare_messages(messages)
+    def prepare_messages(self, messages, rec_id=0):
+        return super(AICompletion, self).prepare_messages(messages, rec_id=rec_id)
 
     def get_completion_params(self, messages, kwargs):
         completion_params = super(AICompletion, self).get_completion_params(messages, kwargs)

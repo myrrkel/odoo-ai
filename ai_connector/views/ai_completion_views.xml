@@ -25,13 +25,16 @@
                             <field name="answer_lang_id" context="{'active_test': False}"/>
                             <field name="response_format"/>
                             <field name="post_process"/>
+                            <field name="vision"/>
+                            <field name="image_source" attrs="{'invisible': [('vision', '=', False)]}"/>
+                            <field name="image_field_id" domain="[('model_id', '=', model_id)]"/>
                         </group>
                     </group>
 
                     <group name="params" string="AI Parameters">
                         <group name="params_left">
                             <field name="ai_provider_id"/>
-                            <field name="ai_model_id" domain="[('ai_provider_id', '=', ai_provider_id)]"/>
+                            <field name="ai_model_id" domain="[('vision', '=', vision), ('ai_provider_id', '=', ai_provider_id)]"/>
                             <field name="temperature"/>
                         </group>
                         <group name="params_right">
