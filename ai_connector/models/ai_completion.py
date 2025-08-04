@@ -4,7 +4,7 @@ import json
 from odoo import models, fields, api, _
 from odoo.tools import html2plaintext
 import base64
-from odoo.addons.web_editor.controllers.main import Web_Editor
+from odoo.addons.html_editor.controllers.main import HTML_Editor
 
 import logging
 
@@ -116,7 +116,7 @@ class AICompletion(models.Model):
                 rec_id = rec_id[0]
 
         if self.ai_provider == 'odoo':
-            res = Web_Editor.generate_text(self, prompt, messages)
+            res = HTML_Editor.generate_text(self, prompt, messages)
             choices = [res]
         else:
             res_choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id,

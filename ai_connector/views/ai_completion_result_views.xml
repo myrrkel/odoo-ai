@@ -40,12 +40,12 @@
         <field name="name">ai.completion.result.view.tree</field>
         <field name="model">ai.completion.result</field>
         <field name="arch" type="xml">
-            <tree string="AI Completion Results" create="false">
+            <list string="AI Completion Results" create="false">
                 <field name="completion_id"/>
                 <field name="model_id"/>
                 <field name="target_field_id"/>
                 <field name="resource_ref"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -53,7 +53,7 @@
         <field name="name">ai.completion.result.simple.view.tree</field>
         <field name="model">ai.completion.result</field>
         <field name="arch" type="xml">
-            <tree string="AI Completion Results" create="false">
+            <list string="AI Completion Results" create="false">
                 <field name="resource_ref"/>
                 <field name="name"/>
                 <field name="completion_id" optional="hide"/>
@@ -61,7 +61,7 @@
                 <field name="answer" optional="hide"/>
                 <button name="action_apply" type="object"
                         string="Apply" class="btn-primary"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -85,7 +85,7 @@
         <field name="name">AI Completion Results</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ai.completion.result</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No AI Completion Result

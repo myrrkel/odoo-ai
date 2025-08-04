@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 {
     'name': 'AI Connector',
-    'version': '17.0.0.0.3',
+    'version': '18.0.0.0.1',
     'author': 'Michel Perrocheau',
     'website': 'https://github.com/myrrkel',
     'summary': "Connector for AI platforms",
@@ -12,7 +12,7 @@
     'depends': [
         'base',
         'mail',
-        'web_editor',
+        'html_editor',
     ],
     'category': 'AI',
     'complexity': 'easy',

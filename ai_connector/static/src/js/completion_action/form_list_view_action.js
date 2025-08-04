@@ -5,6 +5,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { ActionMenus, ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 import { useService } from "@web/core/utils/hooks";
 import { Component } from "@odoo/owl";
+import { user } from "@web/core/user";
 
 
 export class RunCompletion extends Component {
@@ -31,11 +32,7 @@ export class RunCompletion extends Component {
 
 RunCompletion.template = 'ai_connector.RunCompletion';
 
-patch(ActionMenus.prototype, 'ai_connector.ActionMenus', {
-    setup() {
-        this._super();
-        this.user = useService("user");
-    },
+export const CompletionActionMenus = {
 
     async setActionItems(props) {
 
@@ -48,7 +45,7 @@ patch(ActionMenus.prototype, 'ai_connector.ActionMenus', {
         }
 
         try {
-            if (!await this.user.hasGroup("ai_connector.group_ai_user")) {
+            if (!await user.hasGroup("ai_connector.group_ai_user")) {
                 return items;
             }
             const results = await this.orm.call("ai.completion", "get_model_completions", [this.props.resModel]);
@@ -71,5 +68,6 @@ patch(ActionMenus.prototype, 'ai_connector.ActionMenus', {
             return items;
         }
     },
+}
 
-})
+patch(ActionMenus.prototype, CompletionActionMenus)

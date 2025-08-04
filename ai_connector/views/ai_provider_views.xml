@@ -38,12 +38,12 @@
         <field name="name">ai.provider.view.tree</field>
         <field name="model">ai.provider</field>
         <field name="arch" type="xml">
-            <tree string="AI Provider" default_order="sequence">
+            <list string="AI Provider" default_order="sequence">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="code"/>
                 <field name="active" widget="boolean_toggle"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -61,7 +61,7 @@
         <field name="name">AI Providers</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ai.provider</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="ai_provider_view_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

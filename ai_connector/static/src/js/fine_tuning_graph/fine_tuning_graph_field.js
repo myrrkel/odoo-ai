@@ -9,6 +9,12 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { Component, onWillStart, useEffect, useRef } from "@odoo/owl";
 
 export class FineTuningGraphField extends Component {
+    static template = "web.FineTuningGraphField";
+    static props = {
+        ...standardFieldProps,
+        title: { type: String },
+    };
+    
     setup() {
         this.chart = null;
         this.canvasRef = useRef("canvas");
@@ -105,16 +111,11 @@ export class FineTuningGraphField extends Component {
     }
 }
 
-FineTuningGraphField.template = "web.FineTuningGraphField";
-FineTuningGraphField.props = {
-    ...standardFieldProps,
-    title: { type: String },
-};
-
-FineTuningGraphField.extractProps = ({ attrs, field }) => {
-    return {
+const fineTuningGraphField = {
+    component: FineTuningGraphField,
+    extractProps: ({ attrs, field }) => ({
         title: attrs.options.title || field.string,
-    };
+    }),
 };
 
-registry.category("fields").add("fine_tuning_graph", FineTuningGraphField);
+registry.category("fields").add("fine_tuning_graph", fineTuningGraphField);

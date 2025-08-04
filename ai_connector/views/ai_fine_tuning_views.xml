@@ -55,12 +55,12 @@
                         <group col="2">
                             <field name="question_answer_ids"
                                    invisible="training_file_id != False">
-                                <tree name="question_answer" limit="10" default_order="id desc">
+                                <list name="question_answer" limit="10" default_order="id desc">
                                     <field name="model_id"/>
                                     <field name="resource_ref"/>
                                     <field name="answer_completion_id"/>
                                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                     </group>
@@ -68,12 +68,12 @@
                         <group col="2">
                             <field name="training_question_answer_ids"
                                    invisible="training_file_id == False">
-                                <tree name="training_question_answer" limit="10" default_order="id desc">
+                                <list name="training_question_answer" limit="10" default_order="id desc">
                                     <field name="model_id"/>
                                     <field name="resource_ref"/>
                                     <field name="answer_completion_id"/>
                                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                     </group>
@@ -86,14 +86,14 @@
         <field name="name">ai.fine.tuning.view.tree</field>
         <field name="model">ai.fine.tuning</field>
         <field name="arch" type="xml">
-            <tree string="AI Fine-Tunings">
+            <list string="AI Fine-Tunings">
                 <field name="name"/>
                 <field name="job_status"/>
                 <field name="ai_provider_id"/>
                 <field name="ai_model_id"/>
                 <field name="question_answer_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                 <field name="question_answer_domain" optional="hide"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -101,7 +101,7 @@
         <field name="name">AI Fine-Tunings</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ai.fine.tuning</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No AI Fine-Tunings

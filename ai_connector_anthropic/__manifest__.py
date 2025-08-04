@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 {
     'name': 'Anthropic AI Connector',
-    'version': '16.0.0.0',
+    'version': '18.0.0.0.1',
     'author': 'Michel Perrocheau',
     'website': 'https://github.com/myrrkel',
     'summary': "Connector for Anthropic API",
