@@ -53,8 +53,8 @@ class AICompletion(models.Model):
     tool_ids = fields.Many2many('ai.tool', string='Tools', copy=True)
     add_completion_action_menu = fields.Boolean()
     vision = fields.Boolean()
-    image_source = fields.Selection([('main_attachment', _('Main Attachment')),
-                                     ('binary_field', _('Binary Field'))])
+    image_source = fields.Selection([('main_attachment', 'Main Attachment'),
+                                     ('binary_field', 'Binary Field')])
     image_field_id = fields.Many2one('ir.model.fields', string='Image Field')
 
     def prepare_message(self, message, rec_id=0):
@@ -122,7 +122,7 @@ class AICompletion(models.Model):
             res_choices, prompt_tokens, completion_tokens, total_tokens = self.get_completion_results(rec_id,
                                                                                                       messages,
                                                                                                       **kwargs)
-            choices = [choice.message.content for choice in res_choices]
+            choices = [choice for choice in res_choices]
         result_ids = []
         for answer in choices:
             _logger.info(f'Completion result: {answer}')
