@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="ai_agent_view_form" model="ir.ui.view">
+        <field name="name">ai.agent.view.form</field>
+        <field name="model">ai.agent</field>
+        <field name="arch" type="xml">
+            <form string="AI Agent">
+                <sheet>
+                    <header>
+                        <button name="create_agent" type="object"
+                                string="Create Agent" class="btn-primary"/>
+                    </header>
+                    <group name="top">
+                        <group name="top_left">
+                            <field name="name"/>
+                            <field name="external_id" readonly="1"/>
+                            <field name="description"/>
+                            <field name="web_search"/>
+                        </group>
+                        <group name="top_right">
+                            <field name="ai_provider_id"/>
+                            <field name="ai_model_id" domain="[('ai_provider_id', '=', ai_provider_id)]"/>
+                            <field name="temperature"/>
+                            <field name="top_p"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Instructions">
+                            <field name="instructions" nolabel="1" class="oe_inline" style="width: 100%;"/>
+                        </page>
+
+                        <page string="Tools">
+                            <field name="tool_ids">
+                                <list string="Tools">
+                                    <field name="name"/>
+                                    <field name="description"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ai_agent_view_tree" model="ir.ui.view">
+        <field name="name">ai.agent.view.tree</field>
+        <field name="model">ai.agent</field>
+        <field name="arch" type="xml">
+            <list string="AI Agents">
+                <field name="name"/>
+                <field name="external_id"/>
+                <field name="ai_provider_id"/>
+                <field name="ai_model_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ai_agent_view_search" model="ir.ui.view">
+        <field name="name">ai.agent.view.search</field>
+        <field name="model">ai.agent</field>
+        <field name="arch" type="xml">
+            <search string="Search AI Agents">
+                <field name="name"/>
+                <field name="description"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="ai_agent_action" model="ir.actions.act_window">
+        <field name="name">AI Agents</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ai.agent</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="ai_agent_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new AI Agent
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_ai_agent" name="AI Agents"
+              action="ai_agent_action"
+              sequence="8"
+              parent="ai_connector.menu_ai"/>
+
+</odoo>

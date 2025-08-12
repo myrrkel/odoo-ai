@@ -5,7 +5,6 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { ActionMenus, ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 import { useService } from "@web/core/utils/hooks";
 import { Component } from "@odoo/owl";
-import { user } from "@web/core/user";
 
 
 export class RunCompletion extends Component {
@@ -34,39 +33,27 @@ RunCompletion.template = 'ai_connector.RunCompletion';
 
 export const CompletionActionMenus = {
 
-    async setActionItems(props) {
-
-        const items = await this._super(...arguments);
-        if ('registryItems' in props) {
+    async getActionItems(props) {
+        const items = await super.getActionItems(props);
+        if (!('getActiveIds' in this.props) || !this.props.getActiveIds()) {
             return items;
         }
-        if (!('getActiveIds' in props)) {
-            return items;
-        }
-
-        try {
-            if (!await user.hasGroup("ai_connector.group_ai_user")) {
-                return items;
-            }
-            const results = await this.orm.call("ai.completion", "get_model_completions", [this.props.resModel]);
-            results.forEach( res => {
-                items.push({
-                    RunCompletion,
-                    Component: RunCompletion,
-                    groupNumber: ACTIONS_GROUP_NUMBER,
-                    key: `run-completion-${res['id']}`,
-                    description: _t(res['name']),
-                    props: {
-                        menu: this,
-                        title: _t(res['name']),
-                        completion_id: res['id'],
-                    },
-                });
-            })
-            return items;
-        } catch (error) {
-            return items;
-        }
+        const results = await this.orm.call("ai.completion", "get_model_completions", [this.env.searchModel.resModel]);
+        results.forEach( res => {
+            items.push({
+                RunCompletion,
+                Component: RunCompletion,
+                groupNumber: ACTIONS_GROUP_NUMBER,
+                key: `run-completion-${res['id']}`,
+                description: _t(res['name']),
+                props: {
+                    menu: this,
+                    title: _t(res['name']),
+                    completion_id: res['id'],
+                },
+            });
+        })
+        return items;
     },
 }
 

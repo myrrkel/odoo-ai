@@ -17,3 +17,5 @@ access_create_question_answer_wizard_admin,access_create_question_answer_wizard 
 access_question_answer_dump_wizard_admin,access_question_answer_dump_wizard admin,ai_connector.model_question_answer_dump_wizard,base.group_erp_manager,1,1,1,0
 access_ai_fine_tuning_user,access_ai_fine_tuning user,ai_connector.model_ai_fine_tuning,base.group_user,1,0,0,0
 access_ai_fine_tuning_admin,access_ai_fine_tuning admin,ai_connector.model_ai_fine_tuning,base.group_erp_manager,1,1,1,1
+access_ai_agent_user,access_ai_agent user,ai_connector.model_ai_agent,base.group_user,1,0,0,0
+access_ai_agent_admin,access_ai_agent admin,ai_connector.model_ai_agent,base.group_erp_manager,1,1,1,1

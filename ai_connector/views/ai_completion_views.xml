@@ -38,6 +38,7 @@
                             <field name="temperature"/>
                         </group>
                         <group name="params_right">
+                            <field name="agent_id"/>
                             <field name="max_tokens"/>
                             <field name="top_p"/>
                         </group>

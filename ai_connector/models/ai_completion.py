@@ -35,7 +35,8 @@ class AICompletion(models.Model):
 
     def _get_post_process_list(self):
         return [('list_to_many2many', _('List to Many2many')),
-                ('json_to_questions', _('JSON to questions'))]
+                ('json_to_questions', _('JSON to questions')),
+                ('save_values', _('Save values on record')),]
 
     def _get_response_format_list(self):
         return [('text', _('Text')),
@@ -56,6 +57,9 @@ class AICompletion(models.Model):
     image_source = fields.Selection([('main_attachment', 'Main Attachment'),
                                      ('binary_field', 'Binary Field')])
     image_field_id = fields.Many2one('ir.model.fields', string='Image Field')
+
+    agent_id = fields.Many2one('ai.agent', string='Agent', default=False)
+
 
     def prepare_message(self, message, rec_id=0):
         _logger.info(f"Prepare message: {message}")
@@ -134,7 +138,7 @@ class AICompletion(models.Model):
                     result_ids.append(result_id)
                     continue
                 if self.post_process and not self.target_field_id:
-                    self.exec_post_process(answer)
+                    self.with_context(ai_res_id=rec_id).exec_post_process(answer)
                 if self.target_field_id and self.save_on_target_field:
                     self.env[self.model_id.model].browse(rec_id).write({self.target_field_id.name: answer})
                 if not self.save_answer:
@@ -167,6 +171,8 @@ class AICompletion(models.Model):
 
     def get_completion(self, completion_params):
         ai_client = self.get_ai_client()
+        if self.agent_id:
+            return self.agent_id.get_completion(completion_params)
         return ai_client.chat.complete(**completion_params)
 
     # def log_messages(self, messages):
@@ -179,14 +185,27 @@ class AICompletion(models.Model):
     def get_completion_results(self, rec_id, messages, **kwargs):
         completion_params = self.get_completion_params(messages, kwargs)
         res = self.get_completion(completion_params)
-        for choice in res.choices:
-            if choice.finish_reason == 'tool_calls':
-                for tool_call in choice.message.tool_calls:
-                    messages.append(choice.message)
-                    messages.append(self.prepare_message(self.run_tool_call(tool_call)))
-                    return self.get_completion_results(rec_id, messages, **kwargs)
-        choices = [choice.message.content for choice in res.choices]
-        return choices, res.usage.prompt_tokens, res.usage.completion_tokens, res.usage.total_tokens
+        choices = []
+        prompt_tokens = 0
+        completion_tokens = 0
+        total_tokens = 0
+        if res:
+            if hasattr(res, 'choices'):
+                for choice in res.choices:
+                    if choice.finish_reason == 'tool_calls':
+                        for tool_call in choice.message.tool_calls:
+                            messages.append(choice.message)
+                            messages.append(self.prepare_message(self.run_tool_call(tool_call)))
+                            return self.get_completion_results(rec_id, messages, **kwargs)
+                choices = [choice.message.content for choice in res.choices]
+            elif hasattr(res, 'outputs') and res.outputs:
+                choices = [res.outputs[-1].content]
+
+            prompt_tokens = res.usage.prompt_tokens
+            completion_tokens = res.usage.completion_tokens
+            total_tokens = res.usage.total_tokens
+
+        return choices, prompt_tokens, completion_tokens, total_tokens
 
     def get_result_content(self, response_format, choices):
         if self.response_format == 'json_object' or response_format == 'json_object':
@@ -264,6 +283,18 @@ class AICompletion(models.Model):
         post_process_function = getattr(self, self.post_process)
         return post_process_function(value)
 
+    def save_values(self, value):
+        if self.model_id:
+            res_id = self.env.context.get('ai_res_id')
+            if not res_id:
+                return
+            try:
+                values = json.loads(value)
+                record = self.env[self.model_id.model].browse(res_id)
+                record.write(values)
+            except Exception as err:
+                _logger.error(err, exc_info=True)
+
     def get_system_prompt(self, rec_id):
         context = {'html2plaintext': html2plaintext}
         return self._get_prompt(rec_id, self.system_template_id, self.system_template, context)
@@ -289,4 +320,3 @@ class AICompletion(models.Model):
         completion = self.browse(completion_id)
         for res_id in active_ids:
             completion.create_completion(res_id)
-            self.browse(completion_id).create_completion(res_id)
