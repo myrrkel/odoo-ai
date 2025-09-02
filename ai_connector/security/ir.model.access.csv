@@ -19,3 +19,5 @@ access_ai_fine_tuning_user,access_ai_fine_tuning user,ai_connector.model_ai_fine
 access_ai_fine_tuning_admin,access_ai_fine_tuning admin,ai_connector.model_ai_fine_tuning,base.group_erp_manager,1,1,1,1
 access_ai_agent_user,access_ai_agent user,ai_connector.model_ai_agent,base.group_user,1,0,0,0
 access_ai_agent_admin,access_ai_agent admin,ai_connector.model_ai_agent,base.group_erp_manager,1,1,1,1
+access_ai_web_search_engine_user,access_ai_web_search_engine user,ai_connector.model_ai_web_search_engine,base.group_user,1,0,0,0
+access_ai_web_search_engine_admin,access_ai_web_search_engine admin,ai_connector.model_ai_web_search_engine,base.group_erp_manager,1,1,1,1
