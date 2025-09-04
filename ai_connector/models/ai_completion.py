@@ -16,7 +16,7 @@ def _extract_json(content):
     end_post = content.rfind('}') + 1
     res = content[start_pos:end_post]
     try:
-        json_res = json.loads(res)
+        json_res = json.loads(res, strict=False)
     except json.JSONDecodeError as err:
         if '\\_' in res:
             res = res.replace('\\_', '_')
@@ -267,7 +267,7 @@ class AICompletion(models.Model):
         arguments = tool_call_values.get('arguments')
         if arguments:
             if isinstance(arguments, str):
-                arguments = json.loads(arguments)
+                arguments = json.loads(arguments, strict=False)
             _logger.info(f'Run tool: {tool_name}({arguments})')
             res = function(**arguments)
         else:
@@ -284,12 +284,14 @@ class AICompletion(models.Model):
         return post_process_function(value)
 
     def save_values(self, value):
+        if not value:
+            return
         if self.model_id:
             res_id = self.env.context.get('ai_res_id')
             if not res_id:
                 return
             try:
-                values = json.loads(value)
+                values = json.loads(value, strict=False)
                 record = self.env[self.model_id.model].browse(res_id)
                 record.write(values)
             except Exception as err:

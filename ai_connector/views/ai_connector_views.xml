@@ -73,4 +73,10 @@
               parent="main_menu_ai_completion"
               action="ai_agent_action"
               sequence="3"/>
+
+    <menuitem id="main_submenu_ai_websearch_engine"
+              name="AI Websearch Engines"
+              parent="main_menu_ai_completion"
+              action="ai_websearch_engine_action"
+              sequence="4"/>
 </odoo>

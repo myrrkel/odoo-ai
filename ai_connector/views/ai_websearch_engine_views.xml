@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="ai_websearch_engine_view_form" model="ir.ui.view">
+        <field name="name">ai.web.search.engine.view.form</field>
+        <field name="model">ai.web.search.engine</field>
+        <field name="arch" type="xml">
+            <form string="AI Tool">
+                <sheet>
+                    <group name="top">
+                        <field name="name"/>
+                        <field name="api_key"/>
+                        <field name="programmable_search_engine_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ai_websearch_engine_view_tree" model="ir.ui.view">
+        <field name="name">ai.web.search.engine.view.tree</field>
+        <field name="model">ai.web.search.engine</field>
+        <field name="arch" type="xml">
+            <list string="AI Websearch Engines">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ai_websearch_engine_action" model="ir.actions.act_window">
+        <field name="name">AI Websearch Engines</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ai.web.search.engine</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No AI Websearch Engine
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_ai_websearch_engine" name="AI Websearch Engines"
+              action="ai_websearch_engine_action"
+              sequence="7"
+              parent="ai_connector.menu_ai"/>
+</odoo>

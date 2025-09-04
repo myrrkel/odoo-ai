@@ -34,6 +34,7 @@
         'views/ai_question_answer_views.xml',
         'views/ai_tool_views.xml',
         'views/ai_fine_tuning_views.xml',
+        'views/ai_websearch_engine_views.xml',
         'views/ai_connector_views.xml',
         'views/ai_agent_views.xml',
         'wizards/create_question_answer_wizard.xml',
