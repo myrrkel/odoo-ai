@@ -124,6 +124,7 @@ class AiWebSearchEngine(models.Model):
 
     @api.model
     def web_search(self, query, limit=10):
+        excluded_extensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt']
         selenium = None
         api_key = self.api_key or self.env['ir.config_parameter'].sudo().get_param('ai_connector.google_search_api')
         service = build('customsearch', 'v1', developerKey=api_key)
@@ -135,11 +136,14 @@ class AiWebSearchEngine(models.Model):
             selenium = Selenium()
             selenium.start_selenium()
         for i, item in enumerate(items):
+            url = item['link']
+            if any(url.endswith(ext) for ext in excluded_extensions):
+                continue
             if selenium:
-                text = selenium.get_page_text(item['link'])
+                text = selenium.get_page_text(url)
             else:
-                text = get_page_text(item['link'])
-            item_text = f"\n\n## Result {i + 1}\n\nurl: {item['link']}\ntitle: {item['title']}\nhtmlTitle: {item['htmlTitle']}"
+                text = get_page_text(url)
+            item_text = f"\n\n## Result {i + 1}\n\nurl: {url}\ntitle: {item['title']}\nhtmlTitle: {item['htmlTitle']}"
             _logger.info(item_text)
             item_text += f"\ncontent: {item['htmlSnippet']}\n{text}"
             web_search_result += item_text[:3000]
