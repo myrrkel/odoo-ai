@@ -133,6 +133,8 @@ class AICompletion(models.Model):
             if rec_id:
                 if self.response_format == 'json_object' or response_format == 'json_object':
                     answer = _extract_json(answer)
+                if answer and isinstance(answer, list) and hasattr(answer[0], 'type'):
+                    answer = ''.join([c.text for c in answer if c.type=='text'])
                 if self.save_answer:
                     result_id = self.create_result(rec_id, prompt, answer, prompt_tokens, completion_tokens, total_tokens)
                     result_ids.append(result_id)
@@ -256,7 +258,11 @@ class AICompletion(models.Model):
         model = self.env[model_name]
 
         if hasattr(model, tool_name):
-            function = getattr(model, tool_name)
+            if tool_id.res_id:
+                record = self.env[model_name].browse(tool_id.res_id)
+                function = getattr(record, tool_name)
+            else:
+                function = getattr(model, tool_name)
         else:
             model = self.env['ai.tool']
             if hasattr(model, tool_name):
@@ -307,7 +313,7 @@ class AICompletion(models.Model):
             return
         self.test_prompt = self.get_prompt(rec_id)
         res = self.create_completion(rec_id)
-        if res and isinstance(res, list):
+        if res and isinstance(res, list) and hasattr(res[0], 'answer'):
             self.test_answer = res[0].answer
         else:
             self.test_answer = res

@@ -10,6 +10,7 @@
                         <field name="name"/>
                         <field name="api_key"/>
                         <field name="programmable_search_engine_id"/>
+                        <field name="use_selenium"/>
                     </group>
                 </sheet>
             </form>

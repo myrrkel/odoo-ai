@@ -1,6 +1,6 @@
 # Copyright (C) 2025 - Michel Perrocheau (https://github.com/myrrkel).
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
-
+from __future__ import annotations
 from odoo import models, fields, api, _
 from odoo.tools import html2plaintext
 from googleapiclient.discovery import build
@@ -9,14 +9,89 @@ from bs4 import BeautifulSoup # pylint: disable=missing-manifest-dependency
 import requests
 import logging
 
+from os import environ
+from resource import RLIM_INFINITY, RLIMIT_AS, setrlimit
+from odoo.service.server import set_limit_memory_hard
+from selenium.webdriver.common.by import By
+from selenium.webdriver import Chrome, ChromeOptions, Remote
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.support.wait import WebDriverWait
+
 _logger = logging.getLogger(__name__)
+
+
+class Selenium:
+    """Initialize Selenium."""
+    _default_chrome_flags = {
+        "--headless": "",
+        "--no-default-browser-check": "",
+        "--no-first-run": "",
+        "--disable-extensions": "",
+        "--disable-background-networking": "",
+        "--disable-background-timer-throttling": "",
+        "--disable-backgrounding-occluded-windows": "",
+        "--disable-renderer-backgrounding": "",
+        "--disable-breakpad": "",
+        "--disable-client-side-phishing-detection": "",
+        "--disable-crash-reporter": "",
+        "--disable-default-apps": "",
+        "--disable-dev-shm-usage": "",
+        "--disable-device-discovery-notifications": "",
+        "--disable-namespace-sandbox": "",
+        "--disable-translate": "",
+        "--autoplay-policy": "no-user-gesture-required",
+        "--window-size": "1376,768",
+        "--no-sandbox": "",
+        "--disable-gpu": "",
+    }
+
+    def __init__(self, *args, **kwargs):
+        self.driver: WebDriver | None = None
+        self.wait: WebDriverWait | None = None
+        self.selenium_timeout: float = environ.get("SELENIUM_TIMEOUT", 10.0)
+        self.chrome_flags: dict[str, str] = self._default_chrome_flags.copy()
+
+    def start_selenium(self):
+        """Start Selenium"""
+        grid_url = environ.get("SELENIUM_GRID_URL", False)
+        if grid_url:
+            self.driver = Remote(command_executor=grid_url, options=ChromeOptions())
+        else:
+            setrlimit(RLIMIT_AS, (RLIM_INFINITY, RLIM_INFINITY))
+
+            options = Options()
+            for key, value in self.chrome_flags.items():
+                options.add_argument(f"{key}={value}" if value else key)
+
+            self.driver = Chrome(
+                service=Service(),
+                options=options,
+            )
+
+        self.wait = WebDriverWait(self.driver, timeout=self.selenium_timeout, poll_frequency=1)
+        self.driver.implicitly_wait(self.selenium_timeout)
+
+    def stop_selenium(self):
+        """Stop Selenium"""
+        self.driver.quit()
+        set_limit_memory_hard()
+
+    def navigate(self, url: str):
+        self.driver.get(url)
+
+    def get_page_text(self, url: str):
+        self.navigate(url)
+        return self.driver.find_element(By.XPATH, "/html/body").text
+
 
 def url_to_base64(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     }
-    return b64encode(requests.get(url, headers=headers, timeout=120).content).decode("utf-8")
+    return b64encode(requests.get(url, headers=headers, timeout=10).content).decode("utf-8")
 
 
 def get_page_text(url):
@@ -45,20 +120,32 @@ class AiWebSearchEngine(models.Model):
     name = fields.Char(required=True)
     api_key = fields.Char()
     programmable_search_engine_id = fields.Char()
+    use_selenium = fields.Boolean()
 
     @api.model
     def web_search(self, query, limit=10):
+        selenium = None
         api_key = self.api_key or self.env['ir.config_parameter'].sudo().get_param('ai_connector.google_search_api')
         service = build('customsearch', 'v1', developerKey=api_key)
         cx = self.programmable_search_engine_id or self.env['ir.config_parameter'].sudo().get_param('ai_connector.programmable_search_engine_id')
         res = service.cse().list(q=query, cx=cx).execute()
         web_search_result = ''
         items = res['items'][:limit]
+        if items and self.use_selenium:
+            selenium = Selenium()
+            selenium.start_selenium()
         for i, item in enumerate(items):
-            text = get_page_text(item['link'])
+            if selenium:
+                text = selenium.get_page_text(item['link'])
+            else:
+                text = get_page_text(item['link'])
             item_text = f"\n\n## Result {i + 1}\n\nurl: {item['link']}\ntitle: {item['title']}\nhtmlTitle: {item['htmlTitle']}"
+            _logger.info(item_text)
             item_text += f"\ncontent: {item['htmlSnippet']}\n{text}"
             web_search_result += item_text[:3000]
             if len(web_search_result) > 10000:
                 return web_search_result[:10000]
+
+        if selenium:
+            selenium.stop_selenium()
         return web_search_result
