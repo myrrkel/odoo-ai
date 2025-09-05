@@ -1,5 +1,6 @@
 mistralai==1.9.10
 openai==1.63.0
 anthropic
-selenium
-webdriver_manager
+#selenium
+#webdriver_manager
+googleapiclient
