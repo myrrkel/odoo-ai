@@ -65,10 +65,7 @@ class Selenium:
             for key, value in self.chrome_flags.items():
                 options.add_argument(f"{key}={value}" if value else key)
 
-            self.driver = Chrome(
-                service=Service(),
-                options=options,
-            )
+            self.driver = Chrome(service=Service(),options=options)
 
         self.wait = WebDriverWait(self.driver, timeout=self.selenium_timeout, poll_frequency=1)
         self.driver.implicitly_wait(self.selenium_timeout)
@@ -102,7 +99,6 @@ def get_page_text(url):
     for el in soup.find_all(string=True):
         if el.parent.name in blocklist:
             continue
-        _logger.info('%s : %s' % (el.parent.name, el))
         try:
             el_text = html2plaintext(el).strip()
         except Exception as e:
