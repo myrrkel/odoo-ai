@@ -92,20 +92,21 @@ def url_to_base64(url):
 
 
 def get_page_text(url):
-    request = requests.get(url)
-    soup = BeautifulSoup(request.content, "html.parser")
-    blocklist = ['style', 'script', 'a', 'meta', 'comment', 'html', '[document]', 'head']
-    page_text = ''
-    for el in soup.find_all(string=True):
-        if el.parent.name in blocklist:
-            continue
-        try:
+    try:
+        request = requests.get(url)
+        soup = BeautifulSoup(request.content, "html.parser")
+        blocklist = ['style', 'script', 'a', 'meta', 'comment', 'html', '[document]', 'head']
+        page_text = ''
+        for el in soup.find_all(string=True):
+            if el.parent.name in blocklist:
+                continue
             el_text = html2plaintext(el).strip()
-        except Exception as e:
-            el_text = ''
-        if el_text and el_text not in page_text:
-            page_text += el_text + '\n'
-    return page_text
+            if el_text and el_text not in page_text:
+                page_text += el_text + '\n'
+        return page_text
+    except Exception as err:
+        _logger.error(err)
+        return ''
 
 
 class AiWebSearchEngine(models.Model):
