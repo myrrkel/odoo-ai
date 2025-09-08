@@ -93,7 +93,7 @@ def url_to_base64(url):
 
 def get_page_text(url):
     try:
-        request = requests.get(url)
+        request = requests.get(url, timeout=3)
         soup = BeautifulSoup(request.content, "html.parser")
         blocklist = ['style', 'script', 'a', 'meta', 'comment', 'html', '[document]', 'head']
         page_text = ''
