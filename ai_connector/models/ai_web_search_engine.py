@@ -126,7 +126,11 @@ class AiWebSearchEngine(models.Model):
         api_key = self.api_key or self.env['ir.config_parameter'].sudo().get_param('ai_connector.google_search_api')
         service = build('customsearch', 'v1', developerKey=api_key)
         cx = self.programmable_search_engine_id or self.env['ir.config_parameter'].sudo().get_param('ai_connector.programmable_search_engine_id')
-        res = service.cse().list(q=query, cx=cx).execute()
+        try:
+            res = service.cse().list(q=query, cx=cx).execute()
+        except Exception as err:
+            _logger.error(err)
+            return ''
         web_search_result = ''
         items = res['items'][:limit]
         if items and self.use_selenium:
