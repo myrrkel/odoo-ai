@@ -12,12 +12,17 @@ import logging
 from os import environ
 from resource import RLIM_INFINITY, RLIMIT_AS, setrlimit
 from odoo.service.server import set_limit_memory_hard
-from selenium.webdriver.common.by import By
-from selenium.webdriver import Chrome, ChromeOptions, Remote
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.support.wait import WebDriverWait
+try:
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver import Chrome, ChromeOptions, Remote
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.remote.webdriver import WebDriver
+    from selenium.webdriver.support.wait import WebDriverWait
+    SELENIUM_INSTALLED = True
+except ImportError:
+    SELENIUM_INSTALLED = False
+    pass
 
 _logger = logging.getLogger(__name__)
 
@@ -133,7 +138,7 @@ class AiWebSearchEngine(models.Model):
             return ''
         web_search_result = ''
         items = res['items'][:limit]
-        if items and self.use_selenium:
+        if items and SELENIUM_INSTALLED and self.use_selenium:
             selenium = Selenium()
             selenium.start_selenium()
         for i, item in enumerate(items):
