@@ -34,7 +34,6 @@
                 <field name="ai_provider_id"/>
                 <field name="active" widget="boolean_toggle"/>
                 <field name="default" widget="boolean_toggle"/>
-                <field name="ai_provider_sequence" invisible="1"/>
             </list>
         </field>
     </record>

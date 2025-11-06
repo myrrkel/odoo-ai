@@ -6,7 +6,6 @@
         <field name="inherit_id" ref="ai_connector.ai_completion_view_form"/>
         <field name="arch" type="xml">
             <group name="params_left" position="inside">
-                <field name="ai_provider" invisible="1"/>
                 <field name="n" invisible="ai_provider != 'openai'"/>
                 <field name="stop" invisible="ai_provider != 'openai'"/>
             </group>
