@@ -42,21 +42,30 @@ export const CompletionActionMenus = {
         if (!await user.hasGroup("ai_connector.group_ai_user")) {
             return items;
         }
-        const results = await this.orm.call("ai.completion", "get_model_completions", [this.env.searchModel.resModel]);
-        results.forEach( res => {
-            items.push({
-                RunCompletion,
-                Component: RunCompletion,
-                groupNumber: ACTIONS_GROUP_NUMBER,
-                key: `run-completion-${res['id']}`,
-                description: _t(res['name']),
-                props: {
-                    menu: this,
-                    title: _t(res['name']),
-                    completion_id: res['id'],
-                },
-            });
-        })
+        try {
+            const results = await this.orm.call(
+                "ai.completion",
+                "get_model_completions",
+                [this.env.searchModel.resModel]
+            );
+            results.forEach(res => {
+                items.push({
+                    RunCompletion,
+                    Component: RunCompletion,
+                    groupNumber: ACTIONS_GROUP_NUMBER,
+                    key: `run-completion-${res['id']}`,
+                    description: _t(res['name']),
+                    props: {
+                        menu: this,
+                        title: _t(res['name']),
+                        completion_id: res['id'],
+                    },
+                });
+            })
+        } catch (e) {
+            return items;
+        }
+
         return items;
     },
 }
