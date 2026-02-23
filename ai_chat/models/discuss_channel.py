@@ -1,7 +1,7 @@
 # Copyright (C) 2024 - Michel Perrocheau (https://github.com/myrrkel).
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
-from odoo import models, fields, api, _
+from odoo import models, fields, _
 
 
 class Channel(models.Model):
@@ -24,7 +24,6 @@ class Channel(models.Model):
                                                  {'message_ids': self.message_ids.ids})
                     self.message_ids.unlink()
 
-    @api.returns('mail.message', lambda value: value.id)
     def message_post(self, **kwargs):
         message = super(Channel, self).message_post(**kwargs)
         partner_ai = self.env.ref('ai_chat.partner_ai')

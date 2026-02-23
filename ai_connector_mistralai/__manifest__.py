@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 {
     'name': 'AI Connector for Mistral AI',
-    'version': '18.0.0.0.1',
+    'version': '19.0.1.0.0',
     'author': 'Michel Perrocheau',
     'website': 'https://github.com/myrrkel',
     'summary': "Connector for Mistral AI API",

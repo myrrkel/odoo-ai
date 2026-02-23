@@ -44,7 +44,7 @@
         <field name="arch" type="xml">
             <search string="Search AI Model">
                 <field name="name"/>
-                    <group expand="0" string="Group By">
+                    <group>
                         <filter string="AI Provider" name="group_by_ai_provider_id" domain="[]"
                                 context="{'group_by': 'ai_provider_id'}"/>
                     </group>

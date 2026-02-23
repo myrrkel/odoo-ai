@@ -9,8 +9,8 @@ _logger = logging.getLogger(__name__)
 
 
 class AIAgent(models.Model):
-    _name = 'ai.agent'
-    _description = 'AI Agent'
+    _name = 'ai.connector.agent'
+    _description = 'AI Connector Agent'
 
     name = fields.Char(required=True)
     external_id = fields.Char(string='External ID', readonly=True, copy=False)

@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 import json
 from odoo import models, fields, api, _
-from odoo.osv import expression
+from odoo.fields import Domain
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -72,10 +72,10 @@ class AIQuestionAnswer(models.Model):
     @api.model
     def search_question_answer(self, keywords):
         keyword_list = keywords.replace(' ', ',').replace(';', ',').split(',')
-        domain = []
+        domain = Domain()
         for keyword in keyword_list:
-            domain = expression.OR([domain, [('name', '=ilike', f'%{keyword}%')]])
-            domain = expression.OR([domain, [('answer', '=ilike', f'%{keyword}%')]])
+            domain = domain | [('name', '=ilike', f'%{keyword}%')]
+            domain = domain | [('answer', '=ilike', f'%{keyword}%')]
         question_answer_ids = self.search(domain)
         if not question_answer_ids:
             return 'No result found. Suggest to user to reformulate his question or to provide more relevant keywords.'

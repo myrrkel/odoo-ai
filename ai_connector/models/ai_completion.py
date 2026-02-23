@@ -58,7 +58,7 @@ class AICompletion(models.Model):
                                      ('binary_field', 'Binary Field')])
     image_field_id = fields.Many2one('ir.model.fields', string='Image Field')
 
-    agent_id = fields.Many2one('ai.agent', string='Agent', default=False)
+    agent_id = fields.Many2one('ai.connector.agent', string='Agent', default=False)
 
 
     def prepare_message(self, message, rec_id=0):

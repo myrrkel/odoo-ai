@@ -71,7 +71,7 @@
         <field name="arch" type="xml">
             <search string="Search Completion Result">
                 <field name="name"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter string="Completion" name="group_by_completion_id" domain="[]"
                             context="{'group_by': 'completion_id'}"/>
                     <filter string="Model" name="group_by_model_id" domain="[]"
