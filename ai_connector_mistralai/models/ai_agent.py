@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 
 class AIAgent(models.Model):
-    _inherit = 'ai.agent'
+    _inherit = 'ai.connector.agent'
     _description = 'AI Agent'
 
     def _create_agent(self, create_params):
