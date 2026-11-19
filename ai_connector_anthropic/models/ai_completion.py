@@ -45,6 +45,18 @@ class AICompletion(models.Model):
                 }
         return image_content
 
+    def get_completion_params(self, messages, kwargs):
+        completion_params = super(AICompletion, self).get_completion_params(messages, kwargs)
+        if not self.ai_provider == 'anthropic':
+            return completion_params
+        reasoning_effort = completion_params.pop('reasoning_effort', None)
+        if reasoning_effort:
+            # Anthropic sets the effort in output_config. It is sent through extra_body
+            # because output_config is not an argument of messages.create() in older SDK versions.
+            extra_body = completion_params.setdefault('extra_body', {})
+            extra_body.setdefault('output_config', {})['effort'] = reasoning_effort
+        return completion_params
+
     def get_completion(self, completion_params):
         if self.ai_provider == 'anthropic':
             ai_client = self.get_ai_client()

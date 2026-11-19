@@ -43,5 +43,24 @@ class AICompletion(models.Model):
             completion_params = self.get_completion_params(messages, kwargs)
             ocr_text = self.get_completion(completion_params)
             return [ocr_text], 0, 0, 0
-        else:
-            return super(AICompletion, self).get_completion_results(rec_id, messages, **kwargs)
+        choices, prompt_tokens, completion_tokens, total_tokens = super(AICompletion, self).get_completion_results(
+            rec_id, messages, **kwargs)
+        if self.ai_provider == 'mistralai':
+            choices = [self._get_mistral_text_content(content) for content in choices]
+        return choices, prompt_tokens, completion_tokens, total_tokens
+
+    @api.model
+    def _get_mistral_text_content(self, content):
+        """Return the final answer text of a Mistral message content.
+
+        Reasoning models (e.g. Mistral Large 4) return the content as a list of chunks:
+        a ``thinking`` chunk holding the reasoning trace, then ``text`` chunks holding the answer.
+        Only the ``text`` chunks are kept. A plain string content is returned unchanged.
+
+        :param content: message content returned by the Mistral API (``str``, list of chunks or ``None``)
+        :return: the answer text
+        :rtype: str
+        """
+        if isinstance(content, list):
+            return ''.join(chunk.text for chunk in content if getattr(chunk, 'type', None) == 'text')
+        return content

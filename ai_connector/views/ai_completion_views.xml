@@ -40,6 +40,7 @@
                         <group name="params_right">
                             <field name="max_tokens"/>
                             <field name="top_p"/>
+                            <field name="reasoning_effort"/>
                         </group>
                     </group>
 

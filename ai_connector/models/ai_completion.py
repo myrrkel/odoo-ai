@@ -41,6 +41,16 @@ class AICompletion(models.Model):
                 ('json_object', _('JSON Object')),
                 ]
 
+    def _get_reasoning_effort_list(self):
+        return [('none', _('None')),
+                ('minimal', _('Minimal')),
+                ('low', _('Low')),
+                ('medium', _('Medium')),
+                ('high', _('High')),
+                ('xhigh', _('Extra High')),
+                ('max', _('Max')),
+                ]
+
     system_template = fields.Text()
     system_template_id = fields.Many2one('ir.ui.view', string='System Template View')
     temperature = fields.Float(default=1)
@@ -49,6 +59,13 @@ class AICompletion(models.Model):
     test_answer = fields.Text(readonly=True)
     post_process = fields.Selection(selection='_get_post_process_list')
     response_format = fields.Selection(selection='_get_response_format_list', default='text')
+    reasoning_effort = fields.Selection(
+        selection='_get_reasoning_effort_list',
+        help="Reasoning effort of reasoning models. Leave empty to use the model default.\n"
+             "Accepted values depend on the provider and the model:\n"
+             "- Mistral AI: low, medium, high (Large 4); none, high (Small 4, Medium 3.5)\n"
+             "- OpenAI: none, minimal, low, medium, high, xhigh, max\n"
+             "- Anthropic: low, medium, high, xhigh, max")
     tool_ids = fields.Many2many('ai.tool', string='Tools', copy=True)
     add_completion_action_menu = fields.Boolean()
     vision = fields.Boolean()
@@ -148,6 +165,9 @@ class AICompletion(models.Model):
             'temperature': temperature,
             'top_p': top_p,
         }
+        reasoning_effort = kwargs.get('reasoning_effort', self.reasoning_effort)
+        if reasoning_effort:
+            completion_params['reasoning_effort'] = reasoning_effort
         if self.tool_ids:
             completion_params.update(self.get_tools_params())
         return completion_params
